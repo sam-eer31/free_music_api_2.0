@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { SearchConverterCard } from '@/components/SearchConverterCard';
@@ -11,10 +11,51 @@ import { Footer } from '@/components/Footer';
 import { ToastContainer } from '@/components/ToastContainer';
 import { useToast } from '@/hooks/useToast';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function HomePage() {
+  const { theme, toggleTheme, mounted } = useTheme();
   const { toasts, showToast, removeToast } = useToast();
   const audioEngine = useAudioEngine(showToast);
+
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+  const pipelineRef = useRef<HTMLDivElement | null>(null);
+  const resultCardRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll so the FIRST song choice comes into the center of the screen
+  useEffect(() => {
+    if (audioEngine.searchResults.length > 0 && !audioEngine.isConverting) {
+      const timer = setTimeout(() => {
+        const firstSong = document.getElementById('firstTrackChoice');
+        if (firstSong) {
+          firstSong.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [audioEngine.searchResults, audioEngine.isConverting]);
+
+  // For link / conversion case: scroll so the Audio Pipeline card ("Connecting to crisper Audio Core") comes to the center
+  useEffect(() => {
+    if (audioEngine.isConverting) {
+      const timer = setTimeout(() => {
+        pipelineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [audioEngine.isConverting]);
+
+  // Auto-scroll to Result Card when track mastering finishes
+  useEffect(() => {
+    if (audioEngine.conversionResult) {
+      const timer = setTimeout(() => {
+        resultCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [audioEngine.conversionResult]);
 
   return (
     <>
@@ -25,6 +66,9 @@ export default function HomePage() {
           audioEngine.checkHealth();
           showToast(`Checking engine at: ${audioEngine.baseUrl}`, 'info');
         }}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        themeMounted={mounted}
       />
 
       <main className="app-main">
@@ -34,7 +78,6 @@ export default function HomePage() {
           query={audioEngine.query}
           onQueryChange={audioEngine.handleQueryChange}
           onClear={audioEngine.clearQuery}
-          onPaste={audioEngine.pasteFromClipboard}
           videoPreview={audioEngine.videoPreview}
           isSearching={audioEngine.isSearching}
           isConverting={audioEngine.isConverting}
@@ -43,22 +86,28 @@ export default function HomePage() {
         />
 
         {audioEngine.searchResults.length > 0 && !audioEngine.isConverting && (
-          <SearchResultsList
-            tracks={audioEngine.searchResults}
-            onSelectTrack={(track) => audioEngine.startDownloadTrack(track)}
-          />
+          <div ref={resultsRef}>
+            <SearchResultsList
+              tracks={audioEngine.searchResults}
+              onSelectTrack={(track) => audioEngine.startDownloadTrack(track)}
+            />
+          </div>
         )}
 
-        <PipelineStepper
-          currentStep={audioEngine.pipelineStep}
-          customMessage={audioEngine.pipelineMessage}
-          isVisible={audioEngine.isConverting}
-        />
+        <div ref={pipelineRef}>
+          <PipelineStepper
+            currentStep={audioEngine.pipelineStep}
+            customMessage={audioEngine.pipelineMessage}
+            isVisible={audioEngine.isConverting}
+          />
+        </div>
 
-        <ResultCard
-          result={audioEngine.conversionResult}
-          onReset={audioEngine.resetForm}
-        />
+        <div ref={resultCardRef}>
+          <ResultCard
+            result={audioEngine.conversionResult}
+            onReset={audioEngine.resetForm}
+          />
+        </div>
       </main>
 
       <Footer />

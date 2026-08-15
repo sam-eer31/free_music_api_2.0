@@ -90,8 +90,13 @@ export class ConvertController {
 
       console.log(`[Controller] Streaming ${result.filename} to client...`);
 
-      // Set headers for file stream
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(result.filename)}"`);
+      // Set headers for file stream with RFC 5987 clean filename
+      const cleanName = result.filename;
+      const safeAscii = cleanName.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '');
+      const encodedUtf8 = encodeURIComponent(cleanName);
+
+      res.setHeader('Content-Disposition', `attachment; filename="${safeAscii}"; filename*=UTF-8''${encodedUtf8}`);
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length');
       res.setHeader('Content-Type', 'audio/mpeg');
       res.setHeader('Content-Length', result.size);
 

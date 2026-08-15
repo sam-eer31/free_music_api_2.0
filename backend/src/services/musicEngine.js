@@ -20,11 +20,16 @@ export class MusicEngineService {
   }
 
   /**
-   * Cleans filename metadata (removes (youtube), [Official Video], (Lyrics), etc.)
+   * Cleans filename metadata (decodes %20, removes (youtube), [Official Video], duplicate author suffixes, etc.)
    */
   static cleanTrackTitle(rawFilename) {
     if (!rawFilename) return 'audio_track_320k.mp3';
     let name = rawFilename.replace(/\.mp3$/i, '');
+
+    // URL decode if encoded (e.g. %20 -> space)
+    try {
+      name = decodeURIComponent(name);
+    } catch {}
 
     name = name
       .replace(/\s*[\(\[](?:youtube|official\s*(?:video|audio|music\s*video)|lyrics?|hq|hd|audio|320\s*kbps|4k|audio\s*only)[\)\]]/gi, '')
@@ -32,6 +37,13 @@ export class MusicEngineService {
       .replace(/_{2,}/g, ' ')
       .replace(/\s{2,}/g, ' ')
       .trim();
+
+    // Check for duplicate repeating sections e.g., "Alan Walker - Faded - Alan Walker"
+    const parts = name.split(/\s*-\s*/);
+    if (parts.length >= 3 && parts[0].toLowerCase().trim() === parts[parts.length - 1].toLowerCase().trim()) {
+      parts.pop(); // remove repeated trailing artist
+      name = parts.join(' - ');
+    }
 
     if (!name) name = 'audio_track';
     return `${name}.mp3`;

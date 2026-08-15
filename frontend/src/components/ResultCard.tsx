@@ -13,6 +13,22 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
 
   const sizeInMb = (result.size / (1024 * 1024)).toFixed(2);
 
+  // Clean and format display title
+  let cleanTitle = result.filename;
+  try {
+    cleanTitle = decodeURIComponent(cleanTitle);
+  } catch {}
+
+  // Strip .mp3 extension for title card display
+  let displayTitle = cleanTitle.replace(/\.mp3$/i, '');
+  const parts = displayTitle.split(/\s*-\s*/);
+  if (parts.length >= 3 && parts[0].toLowerCase().trim() === parts[parts.length - 1].toLowerCase().trim()) {
+    parts.pop();
+    displayTitle = parts.join(' - ');
+  }
+
+  const downloadFilename = `${displayTitle}.mp3`;
+
   return (
     <section className="glass-panel result-card">
       <div className="result-icon-badge">
@@ -21,7 +37,9 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
         </svg>
       </div>
 
-      <h3 className="result-title">{result.filename}</h3>
+      <h3 className="result-title" title={displayTitle}>
+        {displayTitle}
+      </h3>
 
       <div className="result-file-details">
         <span>MP3 (320kbps)</span>
@@ -32,7 +50,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset }) => {
       <div className="result-actions-row">
         <a
           href={result.downloadUrl}
-          download={result.filename}
+          download={downloadFilename}
           className="btn-download-final"
         >
           <svg

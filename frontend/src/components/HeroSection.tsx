@@ -8,7 +8,9 @@ export const HeroSection: React.FC = () => {
         <span>Studio-Grade 320kbps Engine</span>
       </div>
       <h2 className="hero-title">
-        Stream <span className="hero-title-pink">Studio-Quality Music</span> &amp; Audio
+        A <span className="hero-title-pink">Crisper</span> Way to Find
+        <br />
+        Your Music
       </h2>
       <p className="hero-subtitle">
         Search any track title or paste a media link to choose from top matches and stream{' '}

@@ -9,7 +9,6 @@ interface SearchConverterCardProps {
   query: string;
   onQueryChange: (text: string) => void;
   onClear: () => void;
-  onPaste: () => void;
   videoPreview: VideoInfo | null;
   isSearching: boolean;
   isConverting: boolean;
@@ -21,7 +20,6 @@ export const SearchConverterCard: React.FC<SearchConverterCardProps> = ({
   query,
   onQueryChange,
   onClear,
-  onPaste,
   videoPreview,
   isSearching,
   isConverting,
@@ -71,7 +69,7 @@ export const SearchConverterCard: React.FC<SearchConverterCardProps> = ({
             type="text"
             id="urlInput"
             className="url-input"
-            placeholder="Search..."
+            placeholder="Search songs, artists, or paste links..."
             autoComplete="off"
             spellCheck={false}
             value={query}
@@ -79,33 +77,28 @@ export const SearchConverterCard: React.FC<SearchConverterCardProps> = ({
             onKeyDown={handleKeyDown}
           />
 
-          <div className="input-actions">
-            {query && (
-              <button
-                type="button"
-                className="btn-icon-action"
-                onClick={onClear}
-                title="Clear search input"
-              >
-                Clear
-              </button>
-            )}
+          {query && (
             <button
               type="button"
-              className="btn-icon-action"
-              onClick={onPaste}
-              title="Paste from clipboard"
+              className="btn-icon-clear"
+              onClick={onClear}
+              title="Clear input"
+              aria-label="Clear input"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
               </svg>
-              Paste
             </button>
-          </div>
+          )}
         </div>
       </form>
 

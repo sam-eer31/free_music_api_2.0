@@ -143,14 +143,39 @@ export class ApiClient {
       throw new Error(errorMsg);
     }
 
-    // Inspect content disposition header for filename
+    // Inspect content disposition header for filename (handling RFC 5987 and standard headers)
     const disposition = res.headers.get('Content-Disposition');
     let filename = 'audio_track.mp3';
-    if (disposition && disposition.includes('filename=')) {
-      const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-      if (match && match[1]) {
-        filename = match[1].replace(/['"]/g, '');
+    if (disposition) {
+      const utf8Match = disposition.match(/filename\*=UTF-8''([^;\n]+)/i);
+      if (utf8Match && utf8Match[1]) {
+        try {
+          filename = decodeURIComponent(utf8Match[1]);
+        } catch {
+          filename = utf8Match[1];
+        }
+      } else {
+        const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          const raw = match[1].replace(/['"]/g, '');
+          try {
+            filename = decodeURIComponent(raw);
+          } catch {
+            filename = raw;
+          }
+        }
       }
+    }
+
+    // Clean up filename (decode URL entities, remove duplicate artists)
+    try {
+      filename = decodeURIComponent(filename);
+    } catch {}
+
+    const parts = filename.replace(/\.mp3$/i, '').split(/\s*-\s*/);
+    if (parts.length >= 3 && parts[0].toLowerCase().trim() === parts[parts.length - 1].toLowerCase().trim()) {
+      parts.pop();
+      filename = `${parts.join(' - ')}.mp3`;
     }
 
     onProgress(5, 'Receiving 320kbps MP3 audio stream...');

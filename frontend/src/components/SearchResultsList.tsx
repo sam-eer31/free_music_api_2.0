@@ -20,7 +20,7 @@ export const SearchResultsList: React.FC<SearchResultsListProps> = ({ tracks, on
             width="18"
             height="18"
             fill="none"
-            stroke="var(--c-rose-coral)"
+            stroke="var(--c-crimson)"
             strokeWidth="2"
             viewBox="0 0 24 24"
             aria-hidden="true"
@@ -39,9 +39,10 @@ export const SearchResultsList: React.FC<SearchResultsListProps> = ({ tracks, on
       </div>
 
       <div className="results-list">
-        {tracks.map((track) => (
+        {tracks.map((track, index) => (
           <button
             key={track.id}
+            id={index === 0 ? 'firstTrackChoice' : undefined}
             type="button"
             className="track-item-card"
             onClick={() => onSelectTrack(track)}
