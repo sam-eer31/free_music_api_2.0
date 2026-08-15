@@ -82,29 +82,10 @@ class App {
       this.ui.hideSearchResults();
     });
 
-    // Backend status pill click -> Open Settings Modal
+    // Backend status pill click -> Re-check health
     elements.backendStatusPill.addEventListener('click', () => {
-      this.ui.openSettingsModal(this.api.baseUrl);
-    });
-
-    // Settings Modal Save
-    elements.btnSaveSettings.addEventListener('click', () => {
-      const newUrl = elements.backendUrlInput.value;
-      if (newUrl) {
-        this.api.setBaseUrl(newUrl);
-        this.ui.closeSettingsModal();
-        this.ui.showToast('Backend URL updated!', 'success');
-        this.checkBackendHealth();
-      }
-    });
-
-    // Settings Modal Close
-    elements.btnCloseModal.addEventListener('click', () => this.ui.closeSettingsModal());
-    elements.btnCancelSettings.addEventListener('click', () => this.ui.closeSettingsModal());
-    elements.settingsModal.addEventListener('click', (e) => {
-      if (e.target === elements.settingsModal) {
-        this.ui.closeSettingsModal();
-      }
+      this.checkBackendHealth();
+      this.ui.showToast(`Checking engine at: ${this.api.baseUrl}`, 'info');
     });
   }
 
@@ -143,7 +124,7 @@ class App {
     // Otherwise, perform search and show 7-8 choices
     this.ui.elements.btnShift.disabled = true;
     this.ui.elements.btnShiftSpinner.style.display = 'block';
-    this.ui.elements.btnShiftText.textContent = 'Searching 8 choices...';
+    this.ui.elements.btnShiftText.textContent = 'Searching...';
     this.ui.hideSearchResults();
 
     try {
@@ -163,7 +144,7 @@ class App {
     } finally {
       this.ui.elements.btnShift.disabled = false;
       this.ui.elements.btnShiftSpinner.style.display = 'none';
-      this.ui.elements.btnShiftText.textContent = 'Search & Master 320kbps';
+      this.ui.elements.btnShiftText.textContent = 'Search';
     }
   }
 

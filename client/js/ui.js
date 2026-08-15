@@ -42,11 +42,7 @@ export class UIManager {
       backendStatusPill: document.getElementById('backendStatusPill'),
       backendStatusDot: document.getElementById('backendStatusDot'),
       backendStatusText: document.getElementById('backendStatusText'),
-      settingsModal: document.getElementById('settingsModal'),
-      backendUrlInput: document.getElementById('backendUrlInput'),
-      btnSaveSettings: document.getElementById('btnSaveSettings'),
-      btnCloseModal: document.getElementById('btnCloseModal'),
-      btnCancelSettings: document.getElementById('btnCancelSettings'),
+
       toastContainer: document.getElementById('toastContainer')
     };
 
@@ -221,16 +217,5 @@ export class UIManager {
     this.elements.urlInput.value = '';
     this.hideVideoPreview();
     this.setLoadingState(false);
-  }
-
-  openSettingsModal(currentUrl) {
-    if (this.elements.backendUrlInput) {
-      this.elements.backendUrlInput.value = currentUrl;
-    }
-    this.elements.settingsModal.classList.add('open');
-  }
-
-  closeSettingsModal() {
-    this.elements.settingsModal.classList.remove('open');
   }
 }

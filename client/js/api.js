@@ -3,24 +3,15 @@
  * Handles high-speed audio search, mastering, and streaming
  */
 
-const STORAGE_KEY_API_URL = 'crisper_api_url';
 const DEFAULT_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:3000'
   : 'https://free-music-downloader.onrender.com';
 
 export class ApiClient {
   constructor() {
-    this.baseUrl = this.getStoredBaseUrl();
-  }
-
-  getStoredBaseUrl() {
-    return localStorage.getItem(STORAGE_KEY_API_URL) || DEFAULT_API_URL;
-  }
-
-  setBaseUrl(url) {
-    let cleanUrl = url.trim().replace(/\/+$/, '');
-    localStorage.setItem(STORAGE_KEY_API_URL, cleanUrl);
-    this.baseUrl = cleanUrl;
+    this.baseUrl = (window.APP_ENV && window.APP_ENV.BACKEND_URL) 
+      ? window.APP_ENV.BACKEND_URL.replace(/\/+$/, '')
+      : DEFAULT_API_URL;
   }
 
   /**
