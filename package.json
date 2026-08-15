@@ -1,11 +1,13 @@
 {
-  "name": "crisper-ui",
-  "version": "1.0.0",
-  "description": "Crisper UI Builder",
+  "name": "crisper-workspace",
+  "version": "2.0.0",
+  "private": true,
   "scripts": {
-    "build": "node build.js"
-  },
-  "dependencies": {
-    "dotenv": "^16.4.5"
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:backend": "npm run build --prefix backend",
+    "start:frontend": "npm run start --prefix frontend",
+    "start:backend": "npm run start --prefix backend"
   }
 }

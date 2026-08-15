@@ -1,28 +1,42 @@
-/**
- * crisper Audio Core API Client
- * Handles high-speed audio search, mastering, and streaming
- */
-
-const DEFAULT_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:3000'
-  : 'https://free-music-downloader.onrender.com';
+import { ConversionResult, HealthStatus, TrackResult, VideoInfo } from '@/types';
 
 export class ApiClient {
-  constructor() {
-    this.baseUrl = (window.APP_ENV && window.APP_ENV.BACKEND_URL) 
-      ? window.APP_ENV.BACKEND_URL.replace(/\/+$/, '')
-      : DEFAULT_API_URL;
+  private baseUrl: string;
+
+  constructor(customUrl?: string) {
+    if (customUrl) {
+      this.baseUrl = customUrl.replace(/\/+$/, '');
+    } else if (process.env.NEXT_PUBLIC_BACKEND_URL) {
+      this.baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/+$/, '');
+    } else if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        this.baseUrl = 'http://localhost:3000';
+      } else {
+        this.baseUrl = 'https://free-music-downloader.onrender.com';
+      }
+    } else {
+      this.baseUrl = 'https://free-music-downloader.onrender.com';
+    }
+  }
+
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
+  setBaseUrl(url: string) {
+    this.baseUrl = url.replace(/\/+$/, '');
   }
 
   /**
    * Health check to detect if Render backend is awake
    */
-  async checkHealth() {
+  async checkHealth(): Promise<HealthStatus> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     try {
       const response = await fetch(`${this.baseUrl}/api/health`, {
-        signal: controller.signal
+        signal: controller.signal,
       });
       clearTimeout(timeout);
       if (response.ok) {
@@ -30,16 +44,17 @@ export class ApiClient {
         return { online: true, ...data };
       }
       return { online: false, status: response.status };
-    } catch (err) {
+    } catch (err: unknown) {
       clearTimeout(timeout);
-      return { online: false, error: err.message };
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return { online: false, error: errorMessage };
     }
   }
 
   /**
-   * Search top 7-8 audio choices
+   * Search top audio choices
    */
-  async searchTracks(query) {
+  async searchTracks(query: string): Promise<TrackResult[]> {
     const res = await fetch(`${this.baseUrl}/api/search?q=${encodeURIComponent(query)}`);
     if (!res.ok) {
       throw new Error(`Failed to fetch search results (${res.status})`);
@@ -51,7 +66,7 @@ export class ApiClient {
   /**
    * Parse YouTube Video ID from any standard URL
    */
-  static extractYouTubeId(url) {
+  static extractYouTubeId(url: string): string | null {
     if (!url) return null;
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
     const match = url.match(regex);
@@ -61,13 +76,12 @@ export class ApiClient {
   /**
    * Fetch video metadata (Title, Author, Thumbnail) using YouTube oEmbed / Backend
    */
-  async getVideoInfo(youtubeUrl) {
+  async getVideoInfo(youtubeUrl: string): Promise<VideoInfo> {
     const videoId = ApiClient.extractYouTubeId(youtubeUrl);
     if (!videoId) {
       throw new Error('Invalid YouTube URL format');
     }
 
-    // Fast client-side oEmbed query with backend fallback
     try {
       const oEmbedUrl = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`;
       const res = await fetch(oEmbedUrl);
@@ -79,7 +93,7 @@ export class ApiClient {
             title: data.title,
             author: data.author_name || 'YouTube Creator',
             thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-            url: `https://www.youtube.com/watch?v=${videoId}`
+            url: `https://www.youtube.com/watch?v=${videoId}`,
           };
         }
       }
@@ -92,26 +106,30 @@ export class ApiClient {
       title: `YouTube Video (${videoId})`,
       author: 'YouTube Audio',
       thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-      url: `https://www.youtube.com/watch?v=${videoId}`
+      url: `https://www.youtube.com/watch?v=${videoId}`,
     };
   }
 
   /**
    * Trigger Conversion & Download Stream
    */
-  async requestConversion(youtubeUrl, options = {}, onProgress = () => {}) {
-    onProgress(1, 'Connecting to Render backend engine...');
+  async requestConversion(
+    youtubeUrlOrId: string,
+    options: { format?: string; quality?: string } = {},
+    onProgress: (step: number, msg: string) => void = () => {}
+  ): Promise<ConversionResult> {
+    onProgress(1, 'Connecting to audio engine backend...');
 
     const res = await fetch(`${this.baseUrl}/api/convert`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        url: youtubeUrl,
+        url: youtubeUrlOrId,
         format: options.format || 'mp3',
-        quality: options.quality || '128k'
-      })
+        quality: options.quality || '320kbps',
+      }),
     });
 
     if (!res.ok) {
@@ -135,7 +153,7 @@ export class ApiClient {
       }
     }
 
-    onProgress(5, 'Receiving MP3 audio stream...');
+    onProgress(5, 'Receiving 320kbps MP3 audio stream...');
     const blob = await res.blob();
     const downloadUrl = URL.createObjectURL(blob);
 
@@ -144,7 +162,9 @@ export class ApiClient {
       filename,
       size: blob.size,
       downloadUrl,
-      blob
+      blob,
     };
   }
 }
+
+export const defaultApiClient = new ApiClient();

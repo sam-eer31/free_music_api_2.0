@@ -1,3 +1,9 @@
+# Next.js & Builds
+.next/
+out/
+build/
+dist/
+
 # Dependencies
 node_modules/
 package-lock.json
@@ -9,6 +15,7 @@ package-lock.json
 
 # Temporary Downloads & Media
 temp_downloads/
+backend/temp_downloads/
 *.mp3
 *.wav
 *.mp4
@@ -29,4 +36,4 @@ test-results/
 Thumbs.db
 .vscode/
 .idea/
-client/js/env.js
+
