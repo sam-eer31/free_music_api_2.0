@@ -1,0 +1,31 @@
+{
+  "name": "crisper-audio-core",
+  "version": "3.0.0",
+  "description": "crisper - High performance studio-grade 320kbps audio engine",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx playwright install chromium && node src/app.js",
+    "dev": "node --watch src/app.js",
+    "build": "npx playwright install chromium"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "playwright": "^1.45.3",
+    "uuid": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "audio",
+    "mp3",
+    "music",
+    "stream",
+    "audio-engine"
+  ],
+  "author": "",
+  "license": "MIT"
+}

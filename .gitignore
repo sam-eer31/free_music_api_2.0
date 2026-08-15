@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Temporary Downloads & Media
+temp_downloads/
+*.mp3
+*.wav
+*.mp4
+*.m4a
+
+# Debug & Output Directories
+debug_output*/
+debug_*/
+*.log
+npm-debug.log*
+
+# Playwright & Browsers
+.playwright/
+test-results/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

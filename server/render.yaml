@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: shiftstream-engine
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npx playwright install chromium
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: "0"
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: BROWSER_TIMEOUT
+        value: "60000"

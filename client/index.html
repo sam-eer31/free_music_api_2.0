@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>crisper | Studio-Grade 320kbps Audio Engine</title>
+  <meta name="description" content="crisper - High-fidelity 320kbps audio extraction, search, and direct streaming engine." />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/logo-icon.svg" />
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+  <!-- Ambient Grid Background -->
+  <div class="ambient-bg" aria-hidden="true"></div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <a href="#" class="logo-container" id="logoLink">
+      <div class="logo-icon">
+        <img src="assets/logo-icon.svg" alt="crisper" class="logo-icon-img" />
+      </div>
+      <div class="logo-text">
+        <h1>crisper</h1>
+        <span>Studio Audio Core</span>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <!-- Engine Status Pill -->
+      <button class="backend-status-pill" id="backendStatusPill" title="Configure Audio Engine URL">
+        <span class="status-dot waking" id="backendStatusDot"></span>
+        <span id="backendStatusText">Checking Engine...</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-main">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="badge-tag">
+        <span class="badge-dot"></span>
+        <span>Studio-Grade 320kbps Engine</span>
+      </div>
+      <h2 class="hero-title">
+        Stream <span class="hero-title-pink">Studio-Quality Music</span> & Audio
+      </h2>
+      <p class="hero-subtitle">
+        Search any track title or paste a media link to choose from top matches and stream <span class="hero-highlight-text">320kbps high-fidelity</span> audio.
+      </p>
+    </section>
+
+    <!-- Converter Form Card -->
+    <section class="glass-panel glass-panel-glow converter-card" id="converterCard">
+      
+      <!-- Input Group -->
+      <div class="input-group-container">
+        <div class="input-label-row">
+          <label for="urlInput">Song Title or Media Link</label>
+          <span>Auto-detects queries & links</span>
+        </div>
+
+        <div class="input-wrapper">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          
+          <input 
+            type="text" 
+            id="urlInput" 
+            class="url-input" 
+            placeholder="e.g. Faded, Starboy, Believer or link..." 
+            autocomplete="off"
+            spellcheck="false"
+          />
+
+          <div class="input-actions">
+            <button type="button" class="btn-icon-action" id="btnClear" title="Clear search input">
+              Clear
+            </button>
+            <button type="button" class="btn-icon-action" id="btnPaste" title="Paste from clipboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              Paste
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Format & Quality Options -->
+      <div class="options-row">
+        <div class="format-badge-group">
+          <div class="format-pill">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            MP3 Audio Master
+          </div>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          Bitrate: <code>320 kbps High-Fidelity</code>
+        </div>
+      </div>
+
+      <!-- Live Waveform Visualizer -->
+      <div class="visualizer-container">
+        <canvas id="audioVisualizer"></canvas>
+      </div>
+
+      <!-- Main Search Action Button -->
+      <button type="button" class="btn-shift-trigger" id="btnShift">
+        <div class="spinner" id="btnShiftSpinner" style="display: none;"></div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <span id="btnShiftText">Search & Master 320kbps</span>
+      </button>
+
+    </section>
+
+    <!-- Search Results Choice Panel (Shows 8 options) -->
+    <section class="glass-panel search-results-panel" id="searchResultsPanel">
+      <div class="results-header-row">
+        <div class="results-heading">
+          <svg width="18" height="18" fill="none" stroke="var(--c-rose-coral)" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+          </svg>
+          <span>Select Track to Master (320kbps)</span>
+        </div>
+        <span class="results-count-badge" id="resultsCountBadge">8 Results</span>
+      </div>
+
+      <div class="results-list" id="searchResultsList">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- Pipeline Progress Stepper Card -->
+    <section class="glass-panel pipeline-card" id="pipelineCard">
+      <div class="pipeline-header">
+        <div class="pipeline-title">
+          <svg width="18" height="18" fill="none" stroke="var(--c-rose-coral)" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <span id="pipelineStatusText">Initializing Audio Stream...</span>
+        </div>
+        <div class="pipeline-percentage" id="pipelinePercent">20%</div>
+      </div>
+
+      <div class="stepper-list">
+        <div class="stepper-item active" data-step="1">
+          <div class="step-icon-wrap">1</div>
+          <span>Connecting to crisper Audio Core</span>
+        </div>
+        <div class="stepper-item" data-step="2">
+          <div class="step-icon-wrap">2</div>
+          <span>Analyzing Audio Spectrum & Sample Rate</span>
+        </div>
+        <div class="stepper-item" data-step="3">
+          <div class="step-icon-wrap">3</div>
+          <span>Mastering 320kbps Studio-Quality Stream</span>
+        </div>
+        <div class="stepper-item" data-step="4">
+          <div class="step-icon-wrap">4</div>
+          <span>Packaging MP3 Audio Container</span>
+        </div>
+        <div class="stepper-item" data-step="5">
+          <div class="step-icon-wrap">5</div>
+          <span>Deliver Stream to Browser</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result & Download Card -->
+    <section class="glass-panel result-card" id="resultCard">
+      <div class="result-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+
+      <h3 class="result-title" id="resultTitle">Audio Track Ready</h3>
+
+      <div class="result-file-details">
+        <span id="resultFormatBadge">MP3 (320kbps)</span>
+        <span>•</span>
+        <span id="resultFileSize">HQ Audio</span>
+      </div>
+
+      <div class="result-actions-row">
+        <a href="#" class="btn-download-final" id="btnDownloadFinal" download>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Save MP3
+        </a>
+        <button type="button" class="btn-secondary" id="btnConvertAnother">
+          Search Another
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div>crisper • Studio Audio Core</div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">Fast Edge CDN</a>
+        <a href="#" class="footer-link">320kbps Studio Master</a>
+        <a href="#" class="footer-link">Cloud Audio Engine</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Backend Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">crisper Engine Configuration</h3>
+        <button type="button" class="modal-close-btn" id="btnCloseModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: var(--text-secondary);">
+          Specify the URL of your deployed crisper backend engine:
+        </p>
+        <div class="input-wrapper">
+          <input 
+            type="url" 
+            id="backendUrlInput" 
+            class="url-input" 
+            placeholder="https://your-service.onrender.com" 
+          />
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">
+          For local development, use <code>http://localhost:3000</code>.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelSettings">Cancel</button>
+        <button type="button" class="btn-icon-action" style="background: var(--c-rose-coral); color: #ffffff; padding: 0.6rem 1.2rem; font-weight: 800; border-color: var(--c-rose-coral);" id="btnSaveSettings">Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+/* ==========================================================================
+   Crisper Design System - Rose, Blush & Warm Peach Canvas Architecture
+   Palette:
+     - #FBA1B7 (Rose Coral Vibrant Accent)   rgb(251, 161, 183)
+     - #FFD1DA (Soft Pastel Rose Highlight)  rgb(255, 209, 218)
+     - #FFF0F5 (Lavender Blush Canvas Tint)  rgb(255, 240, 245)
+     - #FFDBAA (Warm Golden Peach Accent)    rgb(255, 219, 170)
+     - #38131F (Rich Deep Plum Contrast)     rgb(56, 19, 31)
+   ========================================================================== */
+
+:root {
+  /* Exact Theme Palette */
+  --c-rose-coral:  #f08da5; /* Vibrant CTA, Active Focus, Wave Harmonic 1 */
+  --c-rose-hover:  #FBA1B7; /* Interactive hover on primary CTA */
+  --c-rose-pastel: #FFD1DA; /* Frosted borders, pill outlines, Wave Harmonic 2 */
+  --c-blush:       #FFF0F5; /* Canvas surface tint & soft badge backgrounds */
+  --c-peach-warm:  #FFDBAA; /* Warm golden peach accent, bitrate tag, Wave Harmonic 3 */
+  --c-deep-plum:   #38131F; /* High-contrast typography, primary buttons */
+
+  /* Legacy & Semantic Mapping */
+  --c-mint-light: #FFF0F5;
+  --c-mint-sage:  #FFD1DA;
+  --c-emerald:    #f08da5;
+  --c-forest:     #38131F;
+
+  /* Light Canvas & Frosted Glass Architecture */
+  --bg-canvas: #ffffff;
+  --bg-surface-white: #ffffff;
+  --bg-surface-tint: #fafafa;
+
+  /* Frosted White & Rose Glassmorphism */
+  --glass-card: rgba(255, 255, 255, 0.90);
+  --glass-card-hover: #ffffff;
+  --glass-border: rgba(255, 209, 218, 0.75);
+  --glass-border-focus: #FBA1B7;
+  --glass-blur: blur(16px);
+
+  /* High-Contrast Light Mode Typography (WCAG AA/AAA compliant) */
+  --text-primary: #38131F;
+  --text-secondary: #68273a;
+  --text-muted: rgba(56, 19, 31, 0.70);
+  --text-dim: rgba(56, 19, 31, 0.42);
+  --text-white: #ffffff;
+  --text-dark: #220810;
+
+  /* Fonts */
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Elevation & Shadows */
+  --shadow-subtle: 0 4px 16px rgba(56, 19, 31, 0.04);
+  --shadow-card: 0 12px 32px rgba(56, 19, 31, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-card-hover: 0 16px 40px rgba(56, 19, 31, 0.11);
+  --shadow-btn: 0 4px 16px rgba(251, 161, 183, 0.42);
+  --shadow-btn-hover: 0 6px 22px rgba(251, 161, 183, 0.60);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 26px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
