@@ -12,10 +12,61 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
 const _G0 = Buffer.from('aHR0cHM6Ly9lbWJlZC5kbHNydi5vbmxpbmUvdjEvYXVkaW8/dmlkZW9JZD0=', 'base64').toString('utf-8');
 const _Q0 = Buffer.from('aHR0cHM6Ly93d3cueW91dHViZS5jb20vcmVzdWx0cz9zZWFyY2hfcXVlcnk9', 'base64').toString('utf-8');
 
+class AsyncQueue {
+  constructor(concurrency = 1) {
+    this.concurrency = concurrency;
+    this.running = 0;
+    this.queue = [];
+  }
+
+  async run(task) {
+    if (this.running >= this.concurrency) {
+      await new Promise((resolve) => this.queue.push(resolve));
+    }
+    this.running++;
+    try {
+      return await task();
+    } finally {
+      this.running--;
+      if (this.queue.length > 0) {
+        const next = this.queue.shift();
+        next();
+      }
+    }
+  }
+}
+
 export class MusicEngineService {
   constructor() {
     if (!fs.existsSync(config.tempDir)) {
       fs.mkdirSync(config.tempDir, { recursive: true });
+    }
+    this.downloadQueue = new AsyncQueue(config.maxConcurrentBrowsers || 1);
+    this.cleanOldTempFiles();
+    // Run periodic cleanup for orphaned temp files every 10 minutes
+    setInterval(() => this.cleanOldTempFiles(), 10 * 60 * 1000).unref();
+  }
+
+  /**
+   * Cleans stale files in temp directory older than maxAgeMinutes
+   */
+  cleanOldTempFiles(maxAgeMinutes = 15) {
+    try {
+      if (!fs.existsSync(config.tempDir)) return;
+      const now = Date.now();
+      const files = fs.readdirSync(config.tempDir);
+      for (const file of files) {
+        const fullPath = path.join(config.tempDir, file);
+        try {
+          const stats = fs.statSync(fullPath);
+          if (now - stats.mtimeMs > maxAgeMinutes * 60 * 1000) {
+            fs.unlinkSync(fullPath);
+            console.log(`[AudioCore] Cleaned up stale temp file: ${file}`);
+          }
+        } catch {}
+      }
+    } catch (err) {
+      console.warn('[AudioCore] Temp cleanup warning:', err.message);
     }
   }
 
@@ -50,12 +101,16 @@ export class MusicEngineService {
   }
 
   /**
-   * Parse ID from media link or query
+   * Parse ID from media link or query (supports raw 11-char IDs and standard YouTube URLs)
    */
   static extractVideoId(input) {
     if (!input) return null;
+    const trimmed = String(input).trim();
+    if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+      return trimmed;
+    }
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-    const match = input.match(regex);
+    const match = trimmed.match(regex);
     return match ? match[1] : null;
   }
 
@@ -172,99 +227,101 @@ export class MusicEngineService {
    * Masters and streams 320kbps audio container
    */
   async download320k(queryOrUrl, quality = '320kbps') {
-    let browser = null;
-    let context = null;
+    return this.downloadQueue.run(async () => {
+      let browser = null;
+      let context = null;
 
-    try {
-      const audioId = await this.resolveVideoId(queryOrUrl);
-      console.log(`[AudioCore] Processing audio stream [ID: ${audioId}] at ${quality}...`);
+      try {
+        const audioId = await this.resolveVideoId(queryOrUrl);
+        console.log(`[AudioCore] Processing audio stream [ID: ${audioId}] at ${quality}...`);
 
-      browser = await chromium.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-blink-features=AutomationControlled',
-          '--disable-gpu',
-          '--mute-audio'
-        ]
-      });
+        browser = await chromium.launch({
+          headless: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-blink-features=AutomationControlled',
+            '--disable-gpu',
+            '--mute-audio'
+          ]
+        });
 
-      context = await browser.newContext({
-        userAgent:
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-        viewport: { width: 1280, height: 800 },
-        locale: 'en-US',
-        acceptDownloads: true
-      });
+        context = await browser.newContext({
+          userAgent:
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+          viewport: { width: 1280, height: 800 },
+          locale: 'en-US',
+          acceptDownloads: true
+        });
 
-      const page = await context.newPage();
-      page.setDefaultTimeout(config.browserTimeout);
+        const page = await context.newPage();
+        page.setDefaultTimeout(config.browserTimeout);
 
-      // Block popup contexts
-      context.on('page', async (newPage) => {
-        if (newPage !== page) {
-          try { await newPage.close(); } catch {}
+        // Block popup contexts
+        context.on('page', async (newPage) => {
+          if (newPage !== page) {
+            try { await newPage.close(); } catch {}
+          }
+        });
+
+        const targetEndpoint = `${_G0}${audioId}`;
+        await page.goto(targetEndpoint, {
+          waitUntil: 'domcontentloaded',
+          timeout: 30000
+        });
+
+        // 1. Select 320kbps quality option
+        console.log(`[AudioCore] Selecting 320kbps audio profile...`);
+        const card = await page.waitForSelector(
+          `p:has-text("${quality}"), div:has-text("${quality}"), span:has-text("${quality}"), div:has-text("320")`,
+          { state: 'visible', timeout: 20000 }
+        );
+
+        await card.click({ delay: 50 });
+
+        // 2. Locate master download button
+        console.log('[AudioCore] Packaging audio stream...');
+        const downloadTrigger = await page.waitForSelector(
+          'button:has-text("Download Now"), span:has-text("Download Now"), button:has-text("Download")',
+          { state: 'visible', timeout: 20000 }
+        );
+
+        // 3. Intercept audio stream
+        const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
+        await downloadTrigger.click({ delay: 50 });
+
+        const download = await downloadPromise;
+        const rawFilename = download.suggestedFilename();
+        const sanitizedFilename = MusicEngineService.cleanTrackTitle(rawFilename);
+
+        const fileId = uuidv4();
+        const savePath = path.join(config.tempDir, `${fileId}_${sanitizedFilename}`);
+
+        console.log(`[AudioCore] Saving 320kbps stream container...`);
+        await download.saveAs(savePath);
+
+        const stats = fs.statSync(savePath);
+        console.log(`[AudioCore] Audio stream mastered successfully: "${sanitizedFilename}" (${(stats.size / 1024 / 1024).toFixed(2)} MB).`);
+
+        return {
+          filePath: savePath,
+          filename: sanitizedFilename,
+          fileId,
+          size: stats.size
+        };
+      } catch (error) {
+        console.error('[AudioCore Stream Error]:', error.message);
+        throw error;
+      } finally {
+        if (context) {
+          try { await context.close(); } catch {}
         }
-      });
-
-      const targetEndpoint = `${_G0}${audioId}`;
-      await page.goto(targetEndpoint, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000
-      });
-
-      // 1. Select 320kbps quality option
-      console.log(`[AudioCore] Selecting 320kbps audio profile...`);
-      const card = await page.waitForSelector(
-        `p:has-text("${quality}"), div:has-text("${quality}"), span:has-text("${quality}"), div:has-text("320")`,
-        { state: 'visible', timeout: 20000 }
-      );
-
-      await card.click({ delay: 50 });
-
-      // 2. Locate master download button
-      console.log('[AudioCore] Packaging audio stream...');
-      const downloadTrigger = await page.waitForSelector(
-        'button:has-text("Download Now"), span:has-text("Download Now"), button:has-text("Download")',
-        { state: 'visible', timeout: 20000 }
-      );
-
-      // 3. Intercept audio stream
-      const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
-      await downloadTrigger.click({ delay: 50 });
-
-      const download = await downloadPromise;
-      const rawFilename = download.suggestedFilename();
-      const sanitizedFilename = MusicEngineService.cleanTrackTitle(rawFilename);
-
-      const fileId = uuidv4();
-      const savePath = path.join(config.tempDir, `${fileId}_${sanitizedFilename}`);
-
-      console.log(`[AudioCore] Saving 320kbps stream container...`);
-      await download.saveAs(savePath);
-
-      const stats = fs.statSync(savePath);
-      console.log(`[AudioCore] Audio stream mastered successfully: "${sanitizedFilename}" (${(stats.size / 1024 / 1024).toFixed(2)} MB).`);
-
-      return {
-        filePath: savePath,
-        filename: sanitizedFilename,
-        fileId,
-        size: stats.size
-      };
-    } catch (error) {
-      console.error('[AudioCore Stream Error]:', error.message);
-      throw error;
-    } finally {
-      if (context) {
-        try { await context.close(); } catch {}
+        if (browser) {
+          try { await browser.close(); } catch {}
+        }
       }
-      if (browser) {
-        try { await browser.close(); } catch {}
-      }
-    }
+    });
   }
 }
 

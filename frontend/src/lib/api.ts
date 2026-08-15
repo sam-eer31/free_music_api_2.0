@@ -13,10 +13,10 @@ export class ApiClient {
       if (hostname === 'localhost' || hostname === '127.0.0.1') {
         this.baseUrl = 'http://localhost:3000';
       } else {
-        this.baseUrl = 'https://free-music-downloader.onrender.com';
+        this.baseUrl = 'https://crisper.onrender.com';
       }
     } else {
-      this.baseUrl = 'https://free-music-downloader.onrender.com';
+      this.baseUrl = 'https://crisper.onrender.com';
     }
   }
 
@@ -64,12 +64,16 @@ export class ApiClient {
   }
 
   /**
-   * Parse YouTube Video ID from any standard URL
+   * Parse YouTube Video ID from standard URL or direct 11-char ID
    */
   static extractYouTubeId(url: string): string | null {
     if (!url) return null;
+    const trimmed = url.trim();
+    if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+      return trimmed;
+    }
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
-    const match = url.match(regex);
+    const match = trimmed.match(regex);
     return match ? match[1] : null;
   }
 

@@ -103,14 +103,33 @@ export class ConvertController {
       // Stream file to response
       const fileStream = fs.createReadStream(result.filePath);
 
+      let cleanedUp = false;
+      const cleanupFile = () => {
+        if (cleanedUp) return;
+        cleanedUp = true;
+        try {
+          if (fs.existsSync(result.filePath)) {
+            fs.unlinkSync(result.filePath);
+            console.log(`[Controller] Cleaned up temporary file: ${result.filename}`);
+          }
+        } catch (cleanupErr) {
+          console.warn('[Controller] Temp cleanup warning:', cleanupErr.message);
+        }
+      };
+
       fileStream.pipe(res);
 
+      res.on('finish', cleanupFile);
+      res.on('close', cleanupFile);
+
       fileStream.on('close', () => {
-        console.log(`[Controller] Stream finished for ${result.filename}. File preserved at: ${result.filePath}`);
+        console.log(`[Controller] Stream finished for ${result.filename}.`);
+        cleanupFile();
       });
 
       fileStream.on('error', (streamErr) => {
         console.error('[Controller] File stream error:', streamErr);
+        cleanupFile();
         if (!res.headersSent) {
           res.status(500).json({ message: 'Error streaming downloaded file' });
         }

@@ -9,11 +9,11 @@ A modern, high-performance web application designed for **Vercel** (Frontend) an
 ```
 [ User Browser ]
        │
-       ▼ (1) Fast CDN & Rose Glassmorphic UI
-[ Vercel Frontend (client/) ]
+       ▼ (1) Fast CDN & Glassmorphic UI
+[ Vercel Frontend (frontend/) ]
        │
        ▼ (2) GET /api/search (8 Choices Grid) or POST /api/convert
-[ Render Audio Core (server/) ]
+[ Render Audio Core (backend/) ]
        │
        ├── Resolves High-Fidelity Audio Stream
        ├── Masters 320kbps Studio Audio Profile
@@ -29,7 +29,7 @@ A modern, high-performance web application designed for **Vercel** (Frontend) an
 
 ### 1. Start the Backend Server
 ```bash
-cd server
+cd backend
 npm install
 npx playwright install chromium
 npm run dev
@@ -38,26 +38,42 @@ npm run dev
 * Health check: `http://localhost:3000/api/health`.
 
 ### 2. Run the Frontend
-Open `client/index.html` directly or run a local static server (e.g. `npx serve client -p 5000`).
+```bash
+cd frontend
+npm install
+npm run dev
+```
+* The frontend will start on `http://localhost:5000`.
 
 ---
 
-## 🌐 1-Click Deployment Guide
+## 🌐 Deployment Configuration
 
 ### A. Deploy Backend to Render (Native Node.js, Zero Docker)
 1. Push this repository to GitHub.
 2. Log in to [render.com](https://render.com).
 3. Click **New +** $\to$ **Web Service** $\to$ Connect your GitHub repo.
 4. Set the following settings:
-   * **Root Directory:** `server`
+   * **Root Directory:** `backend`
    * **Environment:** `Node`
    * **Build Command:** `npm install && npx playwright install chromium`
    * **Start Command:** `npm start`
    * **Plan:** `Free`
 5. In **Environment Variables**, add:
    * `PLAYWRIGHT_BROWSERS_PATH` = `0`
+   * `NODE_ENV` = `production`
 6. Click **Create Web Service**.
-7. Copy your live Render URL (e.g., `https://free-music-downloader.onrender.com`).
+7. Copy your live Render URL (e.g., `https://your-service-name.onrender.com`).
+
+---
+
+### B. Deploy Frontend to Vercel
+1. Log in to [vercel.com](https://vercel.com).
+2. Click **Add New...** $\to$ **Project** $\to$ Import your GitHub repository.
+3. In **Root Directory**, choose `frontend` (or leave default if deploying root with monorepo setup).
+4. In **Environment Variables**, add:
+   * `NEXT_PUBLIC_BACKEND_URL` = `https://your-service-name.onrender.com` (Your Render backend URL)
+5. Click **Deploy**.
 
 ---
 

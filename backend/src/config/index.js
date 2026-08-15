@@ -13,5 +13,5 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN || '*',
   tempDir: path.join(__dirname, '../../temp_downloads'),
   browserTimeout: parseInt(process.env.BROWSER_TIMEOUT || '60000', 10), // 60s max
-  maxConcurrentBrowsers: parseInt(process.env.MAX_CONCURRENT || '2', 10), // 2 for Render 512MB RAM
+  maxConcurrentBrowsers: parseInt(process.env.MAX_CONCURRENT || '1', 10), // 1 for Render 512MB RAM safety
 };
