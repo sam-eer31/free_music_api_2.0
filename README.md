@@ -1,6 +1,6 @@
 # crisper — Studio-Grade 320kbps Audio Engine & Developer API
 
-A modern web application and lightweight REST API providing seamless 320kbps audio search and direct 48-hour cloud delivery via **tmpfiles.org**.
+A modern web application and lightweight REST API providing seamless 320kbps audio search, 5-stage mastering, and direct 48-hour cloud delivery via **tmpfiles.org**.
 
 ---
 
@@ -34,10 +34,18 @@ Pass your search query or YouTube link in the `input` parameter:
 
 ---
 
-### Case 2: Master & Download (48h Direct Link)
+### Case 2: Master & Download (5-Stage Cloud Processing)
 * **Request:** `GET /api/v1/audio?input=60ItHLz5WEA` (or full YouTube URL)
 * **cURL:** `curl "https://crisper.onrender.com/api/v1/audio?input=60ItHLz5WEA"`
-* **Response:**
+
+#### Processing Pipeline:
+1. **Stage 1 (Resolving):** Resolves track ID and extracts metadata.
+2. **Stage 2 (Profiling):** Configures 320kbps studio profile.
+3. **Stage 3 (Mastering):** Captures and masters audio stream into MP3 container.
+4. **Stage 4 (Upload):** Uploads container to `tmpfiles.org` (48-hour lifetime CDN).
+5. **Stage 5 (Return):** Cleans local disk and returns direct download URL.
+
+#### Final Return Payload (200 OK):
 ```json
 {
   "type": "download",
@@ -51,6 +59,15 @@ Pass your search query or YouTube link in the `input` parameter:
   "downloadUrl": "https://tmpfiles.org/dl/wdwkSwFuQcFs/Alan_Walker_-_Faded.mp3",
   "expiresIn": "48 Hours",
   "uploadedAt": "2026-08-15T18:00:20.123Z"
+}
+```
+
+#### Error Response (400 / 500):
+```json
+{
+  "success": false,
+  "type": "download",
+  "error": "Unable to locate audio source for query: \"...\""
 }
 ```
 

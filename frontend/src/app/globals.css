@@ -1443,6 +1443,58 @@ body {
   margin-top: 0.5rem;
 }
 
+/* 5-Stage Pipeline Steps Grid */
+.pipeline-steps-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pipeline-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  padding: 0.85rem 1.15rem;
+  border-radius: 10px;
+  transition: all 0.15s ease;
+}
+
+.pipeline-step-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(203, 41, 87, 0.35);
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--c-crimson);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px var(--c-crimson-glow);
+}
+
+.step-content h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.15rem;
+}
+
+.step-content p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
 /* Tester Section */
 .tester-box {
   display: flex;
