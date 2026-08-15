@@ -33,16 +33,10 @@ app.use(express.urlencoded({ extended: true }));
 // Root status & API Service Overview
 app.get('/', (req, res) => {
   res.json({
-    service: 'Crisper Audio Core & Developer API',
+    service: 'Crisper Audio Core API',
     status: 'active',
     version: '3.0.0',
-    endpoints: {
-      search: 'GET /api/v1/search?q=:query',
-      unified: 'GET /api/v1/unified?input=:query_or_url',
-      stream: 'GET /api/v1/stream?input=:url_or_id (5-Stage SSE live progress)',
-      process: 'POST /api/v1/process { input: ":url_or_id" } (48h tmpfiles download URL)',
-      info: 'GET /api/v1/info?input=:url_or_id'
-    }
+    endpoint: 'GET /api/v1/audio?input=:query_or_url'
   });
 });
 
