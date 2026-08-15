@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
     service: 'Crisper Audio Core API',
     status: 'active',
     version: '3.0.0',
-    endpoint: 'GET /api/v1/audio?input=:query_or_url'
+    endpoint: 'GET /api/v1/process?input=:query_or_url'
   });
 });
 

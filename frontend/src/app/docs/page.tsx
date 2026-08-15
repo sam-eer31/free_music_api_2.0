@@ -19,8 +19,8 @@ export default function ApiDocsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const publicEndpointUrl = 'https://crisper.onrender.com/api/v1/audio';
-  const executeUrl = `${audioEngine.baseUrl || 'https://crisper.onrender.com'}/api/v1/audio`;
+  const publicEndpointUrl = 'https://crisper.onrender.com/api/v1/process';
+  const executeUrl = `${audioEngine.baseUrl || 'https://crisper.onrender.com'}/api/v1/process`;
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -103,14 +103,14 @@ export default function ApiDocsPage() {
               <div className="rule-badge">Case 1: Search Query</div>
               <h3>Pass a Song Name</h3>
               <p>Returns top 8 matching YouTube results with IDs, titles, artists, and durations.</p>
-              <code>GET /api/v1/audio?input=Faded Alan Walker</code>
+              <code>GET /api/v1/process?input=Faded Alan Walker</code>
             </div>
 
             <div className="rule-box">
               <div className="rule-badge rule-badge-accent">Case 2: Direct Download</div>
               <h3>Pass a YouTube Link or ID</h3>
               <p>Executes the 5-stage mastering pipeline, uploads to tmpfiles, and returns a direct 48-hour download link.</p>
-              <code>GET /api/v1/audio?input=60ItHLz5WEA</code>
+              <code>GET /api/v1/process?input=60ItHLz5WEA</code>
             </div>
           </div>
         </section>
@@ -280,7 +280,7 @@ export default function ApiDocsPage() {
                 className="btn-copy-sm"
                 onClick={() =>
                   copyToClipboard(
-                    `curl "https://crisper.onrender.com/api/v1/audio?input=Alan+Walker+Faded"`,
+                    `curl "https://crisper.onrender.com/api/v1/process?input=Alan+Walker+Faded"`,
                     'curl-search'
                   )
                 }
@@ -289,7 +289,7 @@ export default function ApiDocsPage() {
               </button>
             </div>
             <pre className="code-example-pre">
-              <code>{`curl "https://crisper.onrender.com/api/v1/audio?input=Alan+Walker+Faded"`}</code>
+              <code>{`curl "https://crisper.onrender.com/api/v1/process?input=Alan+Walker+Faded"`}</code>
             </pre>
           </div>
 
@@ -300,7 +300,7 @@ export default function ApiDocsPage() {
                 className="btn-copy-sm"
                 onClick={() =>
                   copyToClipboard(
-                    `curl "https://crisper.onrender.com/api/v1/audio?input=60ItHLz5WEA"`,
+                    `curl "https://crisper.onrender.com/api/v1/process?input=60ItHLz5WEA"`,
                     'curl-download'
                   )
                 }
@@ -309,7 +309,7 @@ export default function ApiDocsPage() {
               </button>
             </div>
             <pre className="code-example-pre">
-              <code>{`curl "https://crisper.onrender.com/api/v1/audio?input=60ItHLz5WEA"`}</code>
+              <code>{`curl "https://crisper.onrender.com/api/v1/process?input=60ItHLz5WEA"`}</code>
             </pre>
           </div>
         </section>

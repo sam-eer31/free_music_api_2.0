@@ -6,13 +6,13 @@ A modern web application and lightweight REST API providing seamless 320kbps aud
 
 ## 🔌 Single Unified API Endpoint
 
-Base URL: `https://crisper.onrender.com/api/v1/audio`
+Base URL: `https://crisper.onrender.com/api/v1/process`
 
 Pass your search query or YouTube link in the `input` parameter:
 
 ### Case 1: Search Songs
-* **Request:** `GET /api/v1/audio?input=Faded+Alan+Walker`
-* **cURL:** `curl "https://crisper.onrender.com/api/v1/audio?input=Faded+Alan+Walker"`
+* **Request:** `GET /api/v1/process?input=Faded+Alan+Walker`
+* **cURL:** `curl "https://crisper.onrender.com/api/v1/process?input=Faded+Alan+Walker"`
 * **Response:**
 ```json
 {
@@ -35,8 +35,8 @@ Pass your search query or YouTube link in the `input` parameter:
 ---
 
 ### Case 2: Master & Download (5-Stage Cloud Processing)
-* **Request:** `GET /api/v1/audio?input=60ItHLz5WEA` (or full YouTube URL)
-* **cURL:** `curl "https://crisper.onrender.com/api/v1/audio?input=60ItHLz5WEA"`
+* **Request:** `GET /api/v1/process?input=60ItHLz5WEA` (or full YouTube URL)
+* **cURL:** `curl "https://crisper.onrender.com/api/v1/process?input=60ItHLz5WEA"`
 
 #### Processing Pipeline:
 1. **Stage 1 (Resolving):** Resolves track ID and extracts metadata.
