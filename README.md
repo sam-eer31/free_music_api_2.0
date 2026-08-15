@@ -1,6 +1,6 @@
 # crisper — Studio-Grade 320kbps Audio Engine & Developer API
 
-A modern web application and lightweight REST API providing seamless 320kbps audio search, 5-stage mastering, and direct 48-hour cloud delivery via **tmpfiles.org**.
+A modern web application and lightweight REST/SSE API providing seamless 320kbps audio search, 5-stage mastering, and direct 48-hour cloud delivery via **tmpfiles.org**.
 
 ---
 
@@ -10,7 +10,7 @@ Base URL: `https://crisper.onrender.com/api/v1/audio`
 
 Pass your search query or YouTube link in the `input` parameter:
 
-### Case 1: Search Songs
+### 1. Search Songs
 * **Request:** `GET /api/v1/audio?input=Faded+Alan+Walker`
 * **cURL:** `curl "https://crisper.onrender.com/api/v1/audio?input=Faded+Alan+Walker"`
 * **Response:**
@@ -34,7 +34,7 @@ Pass your search query or YouTube link in the `input` parameter:
 
 ---
 
-### Case 2: Master & Download (5-Stage Cloud Processing)
+### 2. Master & Download (One-Shot JSON)
 * **Request:** `GET /api/v1/audio?input=60ItHLz5WEA` (or full YouTube URL)
 * **cURL:** `curl "https://crisper.onrender.com/api/v1/audio?input=60ItHLz5WEA"`
 
@@ -62,13 +62,24 @@ Pass your search query or YouTube link in the `input` parameter:
 }
 ```
 
-#### Error Response (400 / 500):
-```json
-{
-  "success": false,
-  "type": "download",
-  "error": "Unable to locate audio source for query: \"...\""
-}
+---
+
+### 3. Live 5-Stage Progress Stream (SSE)
+Add `&stream=true` to receive live Server-Sent Events for each stage as it executes in real-time.
+
+* **Request:** `GET /api/v1/audio?input=60ItHLz5WEA&stream=true`
+* **cURL:** `curl -N "https://crisper.onrender.com/api/v1/audio?input=60ItHLz5WEA&stream=true"`
+* **Live Event Stream Output:**
+```text
+data: {"step":1,"stage":"resolving","message":"Resolving audio source...","timestamp":"..."}
+
+data: {"step":2,"stage":"profiling","message":"Configuring 320kbps high-fidelity profile...","timestamp":"..."}
+
+data: {"step":3,"stage":"mastering","message":"Packaging and mastering audio stream...","timestamp":"..."}
+
+data: {"step":4,"stage":"uploading","message":"Uploading container to tmpfiles (48h)...","timestamp":"..."}
+
+data: {"step":5,"stage":"completed","downloadUrl":"https://tmpfiles.org/dl/wdwkSwFuQcFs/Alan_Walker_-_Faded.mp3","expiresIn":"48 Hours"}
 ```
 
 ---

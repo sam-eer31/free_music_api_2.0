@@ -1393,6 +1393,16 @@ body {
   gap: 1.25rem;
 }
 
+.simple-rules-3-col {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 860px) {
+  .simple-rules-3-col {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 680px) {
   .simple-rules-grid {
     grid-template-columns: 1fr;
@@ -1418,6 +1428,10 @@ body {
 
 .rule-badge-accent {
   color: #ff5e87;
+}
+
+.rule-badge-stream {
+  color: #38bdf8;
 }
 
 .rule-box h3 {
@@ -1551,6 +1565,35 @@ body {
 .btn-test-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.tester-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stream-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.stream-toggle-label input[type="checkbox"] {
+  accent-color: var(--c-crimson);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.stream-toggle-label code {
+  font-family: var(--font-jetbrains), monospace;
+  color: #38bdf8;
+  font-weight: 600;
 }
 
 .tester-output-box {
