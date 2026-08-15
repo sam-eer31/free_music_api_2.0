@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../config/index.js';
+import { TmpfilesService } from './tmpfilesService.js';
 
 if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
   process.env.PLAYWRIGHT_BROWSERS_PATH = '0';
@@ -226,12 +227,13 @@ export class MusicEngineService {
   /**
    * Masters and streams 320kbps audio container
    */
-  async download320k(queryOrUrl, quality = '320kbps') {
+  async download320k(queryOrUrl, quality = '320kbps', onProgress = () => {}) {
     return this.downloadQueue.run(async () => {
       let browser = null;
       let context = null;
 
       try {
+        onProgress(1, 'resolving', `Resolving audio source for "${queryOrUrl}"...`);
         const audioId = await this.resolveVideoId(queryOrUrl);
         console.log(`[AudioCore] Processing audio stream [ID: ${audioId}] at ${quality}...`);
 
@@ -272,6 +274,7 @@ export class MusicEngineService {
         });
 
         // 1. Select 320kbps quality option
+        onProgress(2, 'profiling', 'Configuring 320kbps high-fidelity profile...');
         console.log(`[AudioCore] Selecting 320kbps audio profile...`);
         const card = await page.waitForSelector(
           `p:has-text("${quality}"), div:has-text("${quality}"), span:has-text("${quality}"), div:has-text("320")`,
@@ -281,6 +284,7 @@ export class MusicEngineService {
         await card.click({ delay: 50 });
 
         // 2. Locate master download button
+        onProgress(3, 'mastering', 'Packaging and mastering audio stream...');
         console.log('[AudioCore] Packaging audio stream...');
         const downloadTrigger = await page.waitForSelector(
           'button:has-text("Download Now"), span:has-text("Download Now"), button:has-text("Download")',
@@ -308,6 +312,7 @@ export class MusicEngineService {
           filePath: savePath,
           filename: sanitizedFilename,
           fileId,
+          audioId,
           size: stats.size
         };
       } catch (error) {
@@ -322,6 +327,55 @@ export class MusicEngineService {
         }
       }
     });
+  }
+
+  /**
+   * Executes 5-stage pipeline: resolution -> profiling -> mastering -> 48h tmpfiles upload -> cleanup
+   */
+  async downloadAndUploadToTmpfiles(queryOrUrl, quality = '320kbps', onProgress = () => {}) {
+    // 1-3. Run download & mastering with progress
+    const localResult = await this.download320k(queryOrUrl, quality, onProgress);
+
+    try {
+      // 4. Upload to tmpfiles.org
+      onProgress(4, 'uploading', 'Uploading container to tmpfiles (48h lifetime)...');
+      const uploadResult = await TmpfilesService.uploadFile(localResult.filePath, localResult.filename);
+
+      // Clean local file immediately
+      try {
+        if (fs.existsSync(localResult.filePath)) {
+          fs.unlinkSync(localResult.filePath);
+          console.log(`[AudioCore] Cleaned local temp file post-upload: ${localResult.filename}`);
+        }
+      } catch (unlinkErr) {
+        console.warn('[AudioCore] Post-upload cleanup warning:', unlinkErr.message);
+      }
+
+      const finalPayload = {
+        success: true,
+        title: localResult.filename.replace(/\.mp3$/i, ''),
+        filename: localResult.filename,
+        audioId: localResult.audioId,
+        quality,
+        sizeBytes: localResult.size,
+        sizeFormatted: `${(localResult.size / 1024 / 1024).toFixed(2)} MB`,
+        downloadUrl: uploadResult.downloadUrl,
+        expiresIn: uploadResult.expiresIn,
+        uploadedAt: uploadResult.uploadedAt
+      };
+
+      // 5. Completed
+      onProgress(5, 'completed', 'Audio stream container ready!', finalPayload);
+      return finalPayload;
+    } catch (uploadErr) {
+      // Clean local file on upload failure as well
+      try {
+        if (fs.existsSync(localResult.filePath)) {
+          fs.unlinkSync(localResult.filePath);
+        }
+      } catch {}
+      throw uploadErr;
+    }
   }
 }
 

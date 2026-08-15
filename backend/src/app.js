@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { config } from './config/index.js';
 import apiRoutes from './routes/api.js';
+import v1Routes from './routes/v1.js';
 
 const app = express();
 
@@ -29,16 +30,24 @@ app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Root status
+// Root status & API Service Overview
 app.get('/', (req, res) => {
   res.json({
-    service: 'crisper Audio Core API',
+    service: 'Crisper Audio Core & Developer API',
     status: 'active',
-    version: '3.0.0'
+    version: '3.0.0',
+    endpoints: {
+      search: 'GET /api/v1/search?q=:query',
+      unified: 'GET /api/v1/unified?input=:query_or_url',
+      stream: 'GET /api/v1/stream?input=:url_or_id (5-Stage SSE live progress)',
+      process: 'POST /api/v1/process { input: ":url_or_id" } (48h tmpfiles download URL)',
+      info: 'GET /api/v1/info?input=:url_or_id'
+    }
   });
 });
 
 // API Routes
+app.use('/api/v1', v1Routes);
 app.use('/api', apiRoutes);
 
 // Global Error Handler
