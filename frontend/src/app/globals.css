@@ -129,6 +129,37 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ==========================================================================
+   Custom High-End Glassmorphic Scrollbars
+   ========================================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 41, 87, 0.4) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(203, 41, 87, 0.35);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-crimson);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Global Tactile Click Feedback for all devices */
 button:active:not(:disabled),
 .btn-shift-trigger:active:not(:disabled),
@@ -1417,6 +1448,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  transition: all 0.2s ease;
 }
 
 .rule-badge {
@@ -1450,11 +1482,14 @@ body {
 .rule-box code {
   font-family: var(--font-jetbrains), monospace;
   font-size: 0.78rem;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 0.35rem 0.6rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.4rem 0.65rem;
   border-radius: 6px;
-  color: #e5e7eb;
+  color: #f3f4f6;
   margin-top: 0.5rem;
+  word-break: break-all;
+  transition: all 0.2s ease;
 }
 
 /* 5-Stage Pipeline Steps Grid */
@@ -1537,7 +1572,7 @@ body {
   padding: 0.65rem 1rem;
   border-radius: 8px;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .tester-input:focus {
@@ -1596,88 +1631,111 @@ body {
   font-weight: 600;
 }
 
-.tester-output-box {
-  background: #08080a;
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
+/* Polished High-Contrast Code / Terminal Blocks */
+.tester-output-box,
+.code-example-block {
+  background: #09090c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-.output-header {
+.output-header,
+.code-example-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.45rem 0.85rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid var(--glass-border);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #22c55e;
+  padding: 0.5rem 0.95rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.output-header span {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #4ade80;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.code-example-header span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e5e7eb;
+  letter-spacing: 0.02em;
 }
 
 .btn-copy-sm {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--glass-border);
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #f3f4f6;
   font-size: 0.72rem;
   font-weight: 600;
-  padding: 0.2rem 0.55rem;
-  border-radius: 4px;
+  padding: 0.25rem 0.65rem;
+  border-radius: 5px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .btn-copy-sm:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--c-crimson);
+  border-color: var(--c-crimson);
   color: #ffffff;
 }
 
+.output-pre,
+.code-example-pre {
+  padding: 1rem 1.15rem;
+  margin: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) rgba(0, 0, 0, 0.3);
+}
+
 .output-pre {
-  padding: 1rem;
   max-height: 320px;
   overflow-y: auto;
-  margin: 0;
 }
 
 .output-pre code {
   font-family: var(--font-jetbrains), monospace;
   font-size: 0.82rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #a7f3d0;
   white-space: pre-wrap;
-}
-
-/* Code Example Block */
-.code-example-block {
-  background: #08080a;
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.code-example-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.45rem 0.85rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid var(--glass-border);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-
-.code-example-pre {
-  padding: 0.85rem 1rem;
-  margin: 0;
-  overflow-x: auto;
 }
 
 .code-example-pre code {
   font-family: var(--font-jetbrains), monospace;
   font-size: 0.85rem;
-  color: #e5e7eb;
+  line-height: 1.55;
+  color: #f3f4f6;
+}
+
+/* Dedicated Clean Scrollbars for Code Blocks */
+.output-pre::-webkit-scrollbar,
+.code-example-pre::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.output-pre::-webkit-scrollbar-track,
+.code-example-pre::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 9999px;
+}
+
+.output-pre::-webkit-scrollbar-thumb,
+.code-example-pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+.output-pre::-webkit-scrollbar-thumb:hover,
+.code-example-pre::-webkit-scrollbar-thumb:hover {
+  background: var(--c-crimson);
 }
 
 .btn-back-home {
@@ -1697,5 +1755,59 @@ body {
   color: var(--text-primary);
   border-color: var(--c-crimson);
 }
+
+/* ==========================================================================
+   Light Theme Explicit Polish for Docs Page
+   ========================================================================== */
+:root[data-theme="light"] .simple-base-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+:root[data-theme="light"] .rule-box {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+:root[data-theme="light"] .rule-box code {
+  background: rgba(203, 41, 87, 0.08);
+  color: #cb2957;
+  border: 1px solid rgba(203, 41, 87, 0.2);
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .pipeline-step-item {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+:root[data-theme="light"] .pipeline-step-item:hover {
+  background: #fcfcfd;
+  border-color: rgba(203, 41, 87, 0.4);
+}
+
+:root[data-theme="light"] .tester-input {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #111111;
+}
+
+:root[data-theme="light"] .stream-toggle-label {
+  color: #444444;
+}
+
+:root[data-theme="light"] .stream-toggle-label code {
+  color: #0284c7;
+}
+
+:root[data-theme="light"] .code-example-block,
+:root[data-theme="light"] .tester-output-box {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
 
 
