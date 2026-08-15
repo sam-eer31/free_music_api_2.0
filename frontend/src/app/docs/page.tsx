@@ -19,8 +19,8 @@ export default function ApiDocsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const baseUrl = audioEngine.baseUrl || 'https://crisper.onrender.com';
-  const endpointUrl = `${baseUrl}/api/v1/audio`;
+  const publicEndpointUrl = 'https://crisper.onrender.com/api/v1/audio';
+  const executeUrl = `${audioEngine.baseUrl || 'https://crisper.onrender.com'}/api/v1/audio`;
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -39,7 +39,7 @@ export default function ApiDocsPage() {
     setTestOutput('Processing request...');
 
     try {
-      const res = await fetch(`${endpointUrl}?input=${encodeURIComponent(testInput.trim())}`);
+      const res = await fetch(`${executeUrl}?input=${encodeURIComponent(testInput.trim())}`);
       const json = await res.json();
       setTestOutput(JSON.stringify(json, null, 2));
     } catch (err: unknown) {
@@ -81,10 +81,10 @@ export default function ApiDocsPage() {
 
           <div className="simple-base-card">
             <span className="base-tag">Endpoint</span>
-            <code className="base-url">{endpointUrl}</code>
+            <code className="base-url">{publicEndpointUrl}</code>
             <button
               className="btn-copy-base"
-              onClick={() => copyToClipboard(endpointUrl, 'base-url')}
+              onClick={() => copyToClipboard(publicEndpointUrl, 'base-url')}
             >
               {copiedKey === 'base-url' ? '✓ Copied' : 'Copy'}
             </button>
