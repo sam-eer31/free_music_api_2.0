@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export const Footer: React.FC = () => {
   return (
@@ -6,15 +7,15 @@ export const Footer: React.FC = () => {
       <div className="footer-content">
         <div>crisper • Studio Audio Core</div>
         <div className="footer-links">
-          <a href="#" className="footer-link">
-            Fast Edge CDN
-          </a>
-          <a href="#" className="footer-link">
+          <Link href="/docs" className="footer-link">
+            Developer API v1
+          </Link>
+          <span className="footer-link">
             320kbps Studio Master
-          </a>
-          <a href="#" className="footer-link">
-            Cloud Audio Engine
-          </a>
+          </span>
+          <span className="footer-link">
+            48h tmpfiles CDN
+          </span>
         </div>
       </div>
     </footer>

@@ -2,6 +2,8 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { StatusPill } from './StatusPill';
 import { ThemeToggle } from './ThemeToggle';
 import { Theme } from '@/hooks/useTheme';
@@ -23,9 +25,12 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
   themeMounted,
 }) => {
+  const pathname = usePathname();
+  const isDocs = pathname === '/docs';
+
   return (
     <header className="app-header">
-      <a href="#" className="logo-container">
+      <Link href="/" className="logo-container">
         <div className="logo-icon">
           <Image
             src="/assets/logo-icon-white.svg"
@@ -48,7 +53,16 @@ export const Header: React.FC<HeaderProps> = ({
           <h1>crisper</h1>
           <span>Studio Audio Core</span>
         </div>
-      </a>
+      </Link>
+
+      <nav className="header-nav-links">
+        <Link href="/" className={`header-nav-pill ${!isDocs ? 'active' : ''}`}>
+          Studio App
+        </Link>
+        <Link href="/docs" className={`header-nav-pill ${isDocs ? 'active' : ''}`}>
+          API Docs <span className="nav-badge-v1">v1</span>
+        </Link>
+      </nav>
 
       <div className="header-actions">
         <ThemeToggle theme={theme} onToggle={onToggleTheme} mounted={themeMounted} />
