@@ -165,6 +165,7 @@ export class ApiClient {
                   filename: payload.data.filename,
                   size: payload.data.sizeBytes,
                   downloadUrl: localDownloadUrl,
+                  blob,
                 });
               })
               .catch(err => {

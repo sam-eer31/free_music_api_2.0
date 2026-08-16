@@ -19,7 +19,7 @@ export interface ConversionResult {
   filename: string;
   size: number;
   downloadUrl: string;
-  blob: Blob;
+  blob?: Blob;
 }
 
 export interface HealthStatus {
