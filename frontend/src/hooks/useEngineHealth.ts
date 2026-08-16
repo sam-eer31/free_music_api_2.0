@@ -26,5 +26,5 @@ export function useEngineHealth() {
     return () => clearInterval(interval);
   }, [checkHealth]);
 
-  return { backendStatus, backendStatusText, checkHealth, baseUrl: defaultApiClient.baseUrl };
+  return { backendStatus, backendStatusText, checkHealth, baseUrl: defaultApiClient.getBaseUrl() };
 }
