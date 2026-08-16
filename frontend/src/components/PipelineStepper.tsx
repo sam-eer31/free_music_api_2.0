@@ -60,7 +60,29 @@ export const PipelineStepper: React.FC<PipelineStepperProps> = ({
 
           return (
             <div key={step.id} className={stepClass}>
-              <div className="step-icon-wrap">{step.id}</div>
+              <div className="step-icon-wrap">
+                {step.id < currentStep ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                ) : step.id === currentStep ? (
+                  <svg className="spinner-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <circle cx="12" cy="12" r="10" strokeOpacity="0.2" />
+                    <path d="M12 2a10 10 0 0 1 10 10" />
+                    <style>{`
+                      .spinner-icon {
+                        animation: spin 1s linear infinite;
+                      }
+                      @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                      }
+                    `}</style>
+                  </svg>
+                ) : (
+                  step.id
+                )}
+              </div>
               <span>{step.text}</span>
             </div>
           );

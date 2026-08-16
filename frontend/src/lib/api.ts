@@ -122,77 +122,73 @@ export class ApiClient {
     options: { format?: string; quality?: string } = {},
     onProgress: (step: number, msg: string) => void = () => {}
   ): Promise<ConversionResult> {
-    onProgress(1, 'Connecting to audio engine backend...');
+    return new Promise((resolve, reject) => {
+      onProgress(1, 'Connecting to real-time audio stream...');
+      
+      const sseUrl = `${this.baseUrl}/api/v1/audio?input=${encodeURIComponent(youtubeUrlOrId)}&stream=true`;
+      const eventSource = new EventSource(sseUrl);
+      
+      let isCompleted = false;
 
-    const res = await fetch(`${this.baseUrl}/api/convert`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: youtubeUrlOrId,
-        format: options.format || 'mp3',
-        quality: options.quality || '320kbps',
-      }),
-    });
-
-    if (!res.ok) {
-      let errorMsg = 'Conversion failed';
-      try {
-        const errJson = await res.json();
-        errorMsg = errJson.message || errorMsg;
-      } catch {
-        errorMsg = `Server error (${res.status} ${res.statusText})`;
-      }
-      throw new Error(errorMsg);
-    }
-
-    // Inspect content disposition header for filename (handling RFC 5987 and standard headers)
-    const disposition = res.headers.get('Content-Disposition');
-    let filename = 'audio_track.mp3';
-    if (disposition) {
-      const utf8Match = disposition.match(/filename\*=UTF-8''([^;\n]+)/i);
-      if (utf8Match && utf8Match[1]) {
+      eventSource.onmessage = (event) => {
         try {
-          filename = decodeURIComponent(utf8Match[1]);
-        } catch {
-          filename = utf8Match[1];
-        }
-      } else {
-        const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-        if (match && match[1]) {
-          const raw = match[1].replace(/['"]/g, '');
-          try {
-            filename = decodeURIComponent(raw);
-          } catch {
-            filename = raw;
+          const payload = JSON.parse(event.data);
+          
+          if (payload.stage === 'error') {
+            eventSource.close();
+            reject(new Error(payload.message || 'Stream processing failed'));
+            return;
           }
+
+          if (payload.step) {
+            onProgress(payload.step, payload.message || 'Processing...');
+          }
+
+          if (payload.stage === 'completed' && payload.data) {
+            isCompleted = true;
+            eventSource.close();
+            
+            // Fetch the file directly to create a seamless local download instead of navigating
+            onProgress(5, 'Receiving audio stream to browser...');
+            
+            const proxyUrl = `${this.baseUrl}/api/proxy-download?url=${encodeURIComponent(payload.data.downloadUrl)}&filename=${encodeURIComponent(payload.data.filename)}`;
+            
+            fetch(proxyUrl)
+              .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch from download URL');
+                return res.blob();
+              })
+              .then(blob => {
+                const localDownloadUrl = URL.createObjectURL(blob);
+                resolve({
+                  success: true,
+                  filename: payload.data.filename,
+                  size: payload.data.sizeBytes,
+                  downloadUrl: localDownloadUrl,
+                });
+              })
+              .catch(err => {
+                console.error('Failed to fetch blob silently, falling back to direct link', err);
+                resolve({
+                  success: true,
+                  filename: payload.data.filename,
+                  size: payload.data.sizeBytes,
+                  downloadUrl: proxyUrl, // use proxyUrl as fallback so it still forces attachment
+                });
+              });
+          }
+        } catch (e) {
+          console.error("SSE parse error", e);
         }
-      }
-    }
+      };
 
-    // Clean up filename (decode URL entities, remove duplicate artists)
-    try {
-      filename = decodeURIComponent(filename);
-    } catch {}
-
-    const parts = filename.replace(/\.mp3$/i, '').split(/\s*-\s*/);
-    if (parts.length >= 3 && parts[0].toLowerCase().trim() === parts[parts.length - 1].toLowerCase().trim()) {
-      parts.pop();
-      filename = `${parts.join(' - ')}.mp3`;
-    }
-
-    onProgress(5, 'Receiving 320kbps MP3 audio stream...');
-    const blob = await res.blob();
-    const downloadUrl = URL.createObjectURL(blob);
-
-    return {
-      success: true,
-      filename,
-      size: blob.size,
-      downloadUrl,
-      blob,
-    };
+      eventSource.addEventListener('error', () => {
+        if (!isCompleted) {
+          eventSource.close();
+          reject(new Error('Connection to real-time stream lost.'));
+        }
+      });
+    });
   }
 }
 

@@ -86,7 +86,15 @@ data: {"step":5,"stage":"completed","downloadUrl":"https://tmpfiles.org/dl/wdwkS
 
 ## 🚀 Quick Start (Local Development)
 
-### 1. Start Backend
+### 🪟 Windows (1-Click Batch Scripts)
+1. **Setup**: Double-click `setup.bat` (installs backend & frontend dependencies, creates folders, and downloads Playwright Chromium).
+2. **Run**: Double-click `run.bat` (launches backend on `:3000`, frontend on `:5000`, and opens your browser to `http://localhost:5000`).
+
+---
+
+### 💻 Manual Setup (Linux / macOS / CLI)
+
+#### 1. Start Backend
 ```bash
 cd backend
 npm install
@@ -95,10 +103,11 @@ npm run dev
 ```
 * Backend runs on `http://localhost:3000`.
 
-### 2. Start Frontend
+#### 2. Start Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 * Frontend runs on `http://localhost:5000`.
+

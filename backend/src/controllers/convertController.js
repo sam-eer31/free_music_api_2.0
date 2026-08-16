@@ -144,4 +144,42 @@ export class ConvertController {
       }
     }
   }
+
+  /**
+   * Proxy Tmpfiles download to bypass CORS and prevent browser navigation
+   */
+  static async proxyDownload(req, res) {
+    const { url, filename } = req.query;
+    if (!url) return res.status(400).json({ message: 'URL is required' });
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Proxy fetch failed: ${response.status}`);
+      
+      const cleanName = filename || 'audio_track.mp3';
+      const safeAscii = cleanName.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '');
+      const encodedUtf8 = encodeURIComponent(cleanName);
+
+      res.setHeader('Content-Type', response.headers.get('content-type') || 'audio/mpeg');
+      res.setHeader('Content-Disposition', `attachment; filename="${safeAscii}"; filename*=UTF-8''${encodedUtf8}`);
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length');
+      
+      const contentLength = response.headers.get('content-length');
+      if (contentLength) {
+        res.setHeader('Content-Length', contentLength);
+      }
+
+      const { Readable } = await import('stream');
+      if (response.body) {
+         Readable.fromWeb(response.body).pipe(res);
+      } else {
+         res.status(500).json({ message: 'No body in response' });
+      }
+    } catch (err) {
+      console.error('[Proxy Error]:', err.message);
+      if (!res.headersSent) {
+        res.status(500).json({ message: 'Failed to proxy download' });
+      }
+    }
+  }
 }

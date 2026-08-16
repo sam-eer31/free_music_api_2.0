@@ -67,18 +67,6 @@ export function useAudioEngine(showToast: (msg: string, type?: 'info' | 'success
     setSearchResults([]);
   }, []);
 
-  // Paste from clipboard
-  const pasteFromClipboard = useCallback(async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (text) {
-        handleQueryChange(text.trim());
-        showToast('Pasted from clipboard', 'info');
-      }
-    } catch {
-      showToast('Unable to read clipboard. Please paste manually.', 'error');
-    }
-  }, [handleQueryChange, showToast]);
 
   // Master and download track
   const startDownloadTrack = useCallback(async (track: { id: string; title: string }) => {
@@ -89,15 +77,7 @@ export function useAudioEngine(showToast: (msg: string, type?: 'info' | 'success
     setPipelineStep(1);
     setPipelineMessage(`Mastering 320kbps stream for "${track.title}"...`);
 
-    let currentStep = 1;
     if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
-
-    stepIntervalRef.current = setInterval(() => {
-      if (currentStep < 4) {
-        currentStep++;
-        setPipelineStep(currentStep);
-      }
-    }, 2200);
 
     try {
       const result = await defaultApiClient.requestConversion(
@@ -187,7 +167,6 @@ export function useAudioEngine(showToast: (msg: string, type?: 'info' | 'success
     setQuery,
     handleQueryChange,
     clearQuery,
-    pasteFromClipboard,
     isSearching,
     isConverting,
     searchResults,
