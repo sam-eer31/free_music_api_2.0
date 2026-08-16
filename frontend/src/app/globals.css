@@ -340,8 +340,8 @@ body {
 }
 
 .status-dot.online {
-  background-color: var(--c-crimson);
-  box-shadow: 0 0 8px var(--c-crimson), 0 0 14px var(--c-crimson);
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981, 0 0 14px #10b981;
 }
 
 .status-dot.waking {
@@ -696,6 +696,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   padding-bottom: 0.85rem;
   border-bottom: 1px solid var(--glass-border);
 }
@@ -717,6 +719,7 @@ body {
   font-weight: 800;
   padding: 0.3rem 0.75rem;
   border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
 .results-list {
