@@ -146,39 +146,66 @@ export class ConvertController {
   }
 
   /**
-   * Proxy Tmpfiles download to bypass CORS and prevent browser navigation
+   * Directly serve the downloaded file from local temp storage and clean it up
    */
-  static async proxyDownload(req, res) {
-    const { url, filename } = req.query;
-    if (!url) return res.status(400).json({ message: 'URL is required' });
+  static async downloadLocal(req, res) {
+    const { fileId, filename } = req.query;
+    if (!fileId) return res.status(400).json({ message: 'fileId is required' });
 
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Proxy fetch failed: ${response.status}`);
+      const { config } = await import('../config/index.js');
+      const path = await import('path');
       
       const cleanName = filename || 'audio_track.mp3';
       const safeAscii = cleanName.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '');
       const encodedUtf8 = encodeURIComponent(cleanName);
 
-      res.setHeader('Content-Type', response.headers.get('content-type') || 'audio/mpeg');
-      res.setHeader('Content-Disposition', `attachment; filename="${safeAscii}"; filename*=UTF-8''${encodedUtf8}`);
-      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length');
+      // Search for the file in tempDir starting with fileId
+      const files = fs.readdirSync(config.tempDir);
+      const targetFile = files.find(f => f.startsWith(`${fileId}_`));
       
-      const contentLength = response.headers.get('content-length');
-      if (contentLength) {
-        res.setHeader('Content-Length', contentLength);
+      if (!targetFile) {
+        return res.status(404).json({ message: 'File not found or expired' });
       }
 
-      const { Readable } = await import('stream');
-      if (response.body) {
-         Readable.fromWeb(response.body).pipe(res);
-      } else {
-         res.status(500).json({ message: 'No body in response' });
-      }
+      const filePath = path.join(config.tempDir, targetFile);
+      const stats = fs.statSync(filePath);
+
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Content-Disposition', `attachment; filename="${safeAscii}"; filename*=UTF-8''${encodedUtf8}`);
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length');
+      res.setHeader('Content-Length', stats.size);
+
+      const fileStream = fs.createReadStream(filePath);
+
+      let cleanedUp = false;
+      const cleanupFile = () => {
+        if (cleanedUp) return;
+        cleanedUp = true;
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log(`[Controller] Cleaned up temporary file: ${targetFile}`);
+          }
+        } catch (cleanupErr) {
+           console.warn('[Controller] Temp cleanup warning:', cleanupErr.message);
+        }
+      };
+
+      fileStream.pipe(res);
+      res.on('finish', cleanupFile);
+      res.on('close', cleanupFile);
+      fileStream.on('close', cleanupFile);
+      fileStream.on('error', (streamErr) => {
+        cleanupFile();
+        if (!res.headersSent) {
+          res.status(500).json({ message: 'Error streaming local file' });
+        }
+      });
     } catch (err) {
-      console.error('[Proxy Error]:', err.message);
+      console.error('[DownloadLocal Error]:', err.message);
       if (!res.headersSent) {
-        res.status(500).json({ message: 'Failed to proxy download' });
+        res.status(500).json({ message: 'Failed to download local file' });
       }
     }
   }

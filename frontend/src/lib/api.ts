@@ -148,14 +148,16 @@ export class ApiClient {
             isCompleted = true;
             eventSource.close();
             
-            // Fetch the file directly to create a seamless local download instead of navigating
+            // Fetch the file directly from the backend's local storage for a seamless download
             onProgress(5, 'Receiving audio stream to browser...');
             
-            const proxyUrl = `${this.baseUrl}/api/proxy-download?url=${encodeURIComponent(payload.data.downloadUrl)}&filename=${encodeURIComponent(payload.data.filename)}`;
+            const localEndpoint = payload.data.downloadUrl.startsWith('http') 
+              ? payload.data.downloadUrl 
+              : `${this.baseUrl}${payload.data.downloadUrl}`;
             
-            fetch(proxyUrl)
+            fetch(localEndpoint)
               .then(res => {
-                if (!res.ok) throw new Error('Failed to fetch from download URL');
+                if (!res.ok) throw new Error('Failed to fetch local file');
                 return res.blob();
               })
               .then(blob => {
@@ -165,7 +167,6 @@ export class ApiClient {
                   filename: payload.data.filename,
                   size: payload.data.sizeBytes,
                   downloadUrl: localDownloadUrl,
-                  blob,
                 });
               })
               .catch(err => {
@@ -174,7 +175,7 @@ export class ApiClient {
                   success: true,
                   filename: payload.data.filename,
                   size: payload.data.sizeBytes,
-                  downloadUrl: proxyUrl, // use proxyUrl as fallback so it still forces attachment
+                  downloadUrl: localEndpoint,
                 });
               });
           }

@@ -50,14 +50,22 @@ export class ApiV1Controller {
 
         try {
           console.log(`[API v1 SSE] Starting 5-stage stream for: "${input}"`);
-          const result = await musicEngine.downloadAndUploadToTmpfiles(
+          const result = await musicEngine.download320k(
             input,
             '320kbps',
             (step, stage, message, data) => {
               sendEvent(step, stage, message, data);
             }
           );
-          sendEvent(5, 'completed', 'Audio stream container ready!', result);
+          
+          sendEvent(4, 'packaging', 'Preparing direct local download stream...');
+          
+          sendEvent(5, 'completed', 'Audio stream container ready!', {
+            filename: result.filename,
+            sizeBytes: result.size,
+            downloadUrl: `/api/download-local?fileId=${result.fileId}&filename=${encodeURIComponent(result.filename)}`
+          });
+          
           res.write('event: end\ndata: {}\n\n');
           res.end();
         } catch (err) {

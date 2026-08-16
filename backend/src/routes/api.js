@@ -15,7 +15,7 @@ router.get('/info', ConvertController.getInfo);
 // Trigger 320kbps format shift and stream MP3
 router.post('/convert', ConvertController.convert);
 
-// Proxy tmpfiles download to bypass CORS
-router.get('/proxy-download', ConvertController.proxyDownload);
+// Serve the local downloaded file
+router.get('/download-local', ConvertController.downloadLocal);
 
 export default router;

@@ -260,6 +260,16 @@ export class MusicEngineService {
         const page = await context.newPage();
         page.setDefaultTimeout(config.browserTimeout);
 
+        // Block non-essential resources to aggressively reduce RAM usage
+        await page.route('**/*', (route) => {
+          const requestType = route.request().resourceType();
+          if (['image', 'stylesheet', 'font', 'media'].includes(requestType)) {
+            route.abort();
+          } else {
+            route.continue();
+          }
+        });
+
         // Block popup contexts
         context.on('page', async (newPage) => {
           if (newPage !== page) {
