@@ -7,16 +7,14 @@ import { SearchConverterCard } from '@/components/SearchConverterCard';
 import { SearchResultsList } from '@/components/SearchResultsList';
 import { PipelineStepper } from '@/components/PipelineStepper';
 import { ResultCard } from '@/components/ResultCard';
-import { Footer } from '@/components/Footer';
-import { ToastContainer } from '@/components/ToastContainer';
-import { useToast } from '@/hooks/useToast';
+import { FeaturesSection } from '@/components/FeaturesSection';
+import { HowItWorks } from '@/components/HowItWorks';
+import { FaqSection } from '@/components/FaqSection';
+import { ApiSpotlight } from '@/components/ApiSpotlight';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
-import { useTheme } from '@/hooks/useTheme';
 
 export default function HomePage() {
-  const { theme, toggleTheme, mounted } = useTheme();
-  const { toasts, showToast, removeToast } = useToast();
-  const audioEngine = useAudioEngine(showToast);
+  const audioEngine = useAudioEngine();
 
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const pipelineRef = useRef<HTMLDivElement | null>(null);
@@ -59,20 +57,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Header
-        status={audioEngine.backendStatus}
-        statusText={audioEngine.backendStatusText}
-        onCheckHealth={() => {
-          audioEngine.checkHealth();
-          showToast(`Checking engine at: ${audioEngine.baseUrl}`, 'info');
-        }}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        themeMounted={mounted}
-      />
-
-      <main className="app-main">
-        <HeroSection />
+      <HeroSection />
 
         <SearchConverterCard
           query={audioEngine.query}
@@ -108,11 +93,11 @@ export default function HomePage() {
             onReset={audioEngine.resetForm}
           />
         </div>
-      </main>
 
-      <Footer />
-
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
+        <FeaturesSection />
+        <HowItWorks />
+        <ApiSpotlight />
+        <FaqSection />
     </>
   );
 }

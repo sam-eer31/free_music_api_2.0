@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { defaultApiClient, ApiClient } from '@/lib/api';
 import { ConversionResult, TrackResult, VideoInfo } from '@/types';
+import { useToast } from '@/hooks/useToast';
 
-export function useAudioEngine(showToast: (msg: string, type?: 'info' | 'success' | 'error') => void) {
-  const [backendStatus, setBackendStatus] = useState<'waking' | 'online' | 'offline'>('waking');
-  const [backendStatusText, setBackendStatusText] = useState<string>('Checking Engine...');
+export function useAudioEngine() {
+  const { showToast } = useToast();
+  
   const [query, setQuery] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [isConverting, setIsConverting] = useState<boolean>(false);
@@ -19,25 +20,6 @@ export function useAudioEngine(showToast: (msg: string, type?: 'info' | 'success
 
   const stepIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check health on mount and periodically
-  const checkHealth = useCallback(async () => {
-    setBackendStatus('waking');
-    setBackendStatusText('Checking Engine...');
-    const result = await defaultApiClient.checkHealth();
-    if (result.online) {
-      setBackendStatus('online');
-      setBackendStatusText('Engine Ready');
-    } else {
-      setBackendStatus('offline');
-      setBackendStatusText('Engine Offline');
-    }
-  }, []);
-
-  useEffect(() => {
-    checkHealth();
-    const interval = setInterval(checkHealth, 30000);
-    return () => clearInterval(interval);
-  }, [checkHealth]);
 
   // Live video preview when typing direct YouTube URL
   const handleQueryChange = useCallback(async (text: string) => {
@@ -160,9 +142,6 @@ export function useAudioEngine(showToast: (msg: string, type?: 'info' | 'success
   }, []);
 
   return {
-    backendStatus,
-    backendStatusText,
-    checkHealth,
     query,
     setQuery,
     handleQueryChange,

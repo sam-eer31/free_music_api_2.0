@@ -2,17 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { ToastContainer } from '@/components/ToastContainer';
 import { useToast } from '@/hooks/useToast';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
-import { useTheme } from '@/hooks/useTheme';
 
 export default function ApiDocsPage() {
-  const { theme, toggleTheme, mounted } = useTheme();
-  const { toasts, showToast, removeToast } = useToast();
-  const audioEngine = useAudioEngine(showToast);
+  const { showToast } = useToast();
+  const audioEngine = useAudioEngine();
 
   const [testInput, setTestInput] = useState('60ItHLz5WEA');
   const [isStreamEnabled, setIsStreamEnabled] = useState(false);
@@ -78,28 +73,15 @@ export default function ApiDocsPage() {
   };
 
   return (
-    <>
-      <Header
-        status={audioEngine.backendStatus}
-        statusText={audioEngine.backendStatusText}
-        onCheckHealth={() => {
-          audioEngine.checkHealth();
-          showToast(`Checking engine at: ${audioEngine.baseUrl}`, 'info');
-        }}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        themeMounted={mounted}
-      />
-
-      <main className="app-main simple-docs-main">
-        {/* Simple Header */}
-        <section className="simple-docs-header">
-          <div className="simple-badge-row">
-            <span className="simple-badge">v1.0.0 Public API</span>
-            <span className="simple-badge badge-accent">320kbps Audio Core</span>
-            <span className="simple-badge">48h tmpfiles CDN</span>
-            <span className="simple-badge">Free • Zero Auth</span>
-          </div>
+    <div className="simple-docs-main">
+      {/* Simple Header */}
+      <section className="simple-docs-header">
+        <div className="simple-badge-row">
+          <span className="simple-badge">v1.0.0 Public API</span>
+          <span className="simple-badge badge-accent">High-Fidelity Audio Core</span>
+          <span className="simple-badge">48h tmpfiles CDN</span>
+          <span className="simple-badge">Free • Zero Auth</span>
+        </div>
 
           <h1 className="simple-docs-title">Developer API Reference</h1>
           <p className="simple-docs-subtitle">
@@ -385,10 +367,6 @@ data: {"step":5,"stage":"completed","downloadUrl":"https://tmpfiles.org/dl/wdwkS
             ← Back to Studio Web App
           </Link>
         </div>
-      </main>
-
-      <Footer />
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-    </>
+    </div>
   );
 }

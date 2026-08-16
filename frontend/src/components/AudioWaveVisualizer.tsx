@@ -20,31 +20,48 @@ export const AudioWaveVisualizer: React.FC<AudioWaveVisualizerProps> = ({ isActi
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let canvasWidth = 800; // Safe default
+    let canvasHeight = 64;
+
     const resize = () => {
-      const rect = container.getBoundingClientRect();
-      const width = rect.width > 0 ? rect.width : (container.clientWidth || 320);
-      const height = rect.height > 0 ? rect.height : (container.clientHeight || 64);
+      const newWidth = container.offsetWidth || container.clientWidth;
+      const newHeight = container.offsetHeight || container.clientHeight;
+      
+      // CRITICAL FIX: During theme toggles or fast scrolling, the browser can temporarily
+      // report 0 width due to layout thrashing. If we resize to 0 (or a fallback like 320),
+      // the canvas buffer shrinks and permanently breaks until the next manual resize.
+      // Solution: Ignore 0-dimension layout shifts.
+      if (!newWidth || !newHeight) return;
+
+      // Prevent unnecessary canvas wipes (which cause flickering) if size hasn't actually changed
+      if (canvas.width > 0 && newWidth === canvasWidth && newHeight === canvasHeight) return;
+
+      canvasWidth = newWidth;
+      canvasHeight = newHeight;
       const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2 for mobile performance
 
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      canvas.width = canvasWidth * dpr;
+      canvas.height = canvasHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Instantly redraw frame if not animating
-      if (!isActive) {
-        drawFrame(false, width, height);
-      }
+      // Instantly redraw frame to prevent blank canvas if rAF is suspended
+      // Pass delta=0 so we don't accidentally fast-forward the animation!
+      drawFrame(isActive, 0);
     };
 
-    const drawFrame = (active: boolean, w?: number, h?: number) => {
-      const rect = container.getBoundingClientRect();
-      const width = w || (rect.width > 0 ? rect.width : (container.clientWidth || 320));
-      const height = h || (rect.height > 0 ? rect.height : (container.clientHeight || 64));
+    const drawFrame = (active: boolean, deltaMs: number = 16.66) => {
+      const width = canvasWidth;
+      const height = canvasHeight;
       const centerY = height / 2;
       const isLight = document.documentElement.getAttribute('data-theme') === 'light';
 
       ctx.clearRect(0, 0, width, height);
-      stepRef.current += active ? 0.06 : 0.02;
+      
+      // Time-based animation step to ensure identical speed on 60Hz and 144Hz monitors
+      // deltaMs=0 is used when forced redraws (resize/theme) occur, preventing animation jerks
+      const timeScale = deltaMs / 16.66;
+      stepRef.current += (active ? 0.06 : 0.02) * timeScale;
+      
       const step = stepRef.current;
 
       if (!active) {
@@ -100,8 +117,16 @@ export const AudioWaveVisualizer: React.FC<AudioWaveVisualizerProps> = ({ isActi
       });
     };
 
-    const animateLoop = () => {
-      drawFrame(isActive);
+    let lastTime = performance.now();
+
+    const animateLoop = (time: number) => {
+      const delta = time - lastTime;
+      lastTime = time;
+      
+      // Cap delta to 50ms (20fps fallback) to prevent huge skips if user switches tabs
+      const safeDelta = Math.min(delta, 50);
+      drawFrame(isActive, safeDelta);
+      
       animationRef.current = requestAnimationFrame(animateLoop);
     };
 
@@ -119,6 +144,15 @@ export const AudioWaveVisualizer: React.FC<AudioWaveVisualizerProps> = ({ isActi
       window.addEventListener('resize', resize);
     }
 
+    const themeObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.attributeName === 'data-theme') {
+          drawFrame(isActive, 0); // delta=0 prevents animation jerk
+        }
+      }
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
     // Run continuous animation loop
     animationRef.current = requestAnimationFrame(animateLoop);
 
@@ -131,6 +165,7 @@ export const AudioWaveVisualizer: React.FC<AudioWaveVisualizerProps> = ({ isActi
       } else {
         window.removeEventListener('resize', resize);
       }
+      themeObserver.disconnect();
     };
   }, [isActive]);
 
