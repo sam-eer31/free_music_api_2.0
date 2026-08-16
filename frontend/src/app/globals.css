@@ -459,7 +459,9 @@ body {
 .input-label-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .input-label-row label {
