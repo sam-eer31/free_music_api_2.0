@@ -113,9 +113,9 @@ data: {"step":5,"stage":"completed","downloadUrl":"https://tmpfiles.org/dl/wdwkS
 
 The codebase consists of a modern **Next.js 15 Frontend** and an **Express/Playwright Backend**.
 
-### 🪟 Windows (1-Click Batch Scripts)
-1. **Setup**: Double-click `setup.bat` (installs backend & frontend dependencies, creates folders, and downloads Playwright Chromium).
-2. **Run**: Double-click `run.bat` (launches backend on `:3000`, frontend on `:5000`, and opens your browser to `http://localhost:5000`).
+### 🪟 Windows (1-Click Executables)
+1. **Setup**: Double-click `setup.exe` (installs backend & frontend dependencies, creates folders, and downloads Playwright Chromium).
+2. **Run**: Double-click `crisper.exe` (launches backend on `:3000`, frontend on `:5000`, and opens your browser to `http://localhost:5000`).
 
 ### 💻 Manual Setup (Linux / macOS / CLI)
 
