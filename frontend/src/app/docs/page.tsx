@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/useToast';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
+import { useSlider } from '@/hooks/useSlider';
+
+import { CopyIcon, CheckIcon } from '@/components/icons';
 
 export default function ApiDocsPage() {
   const { showToast } = useToast();
@@ -14,6 +17,8 @@ export default function ApiDocsPage() {
   const [testOutput, setTestOutput] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const { scrollRef, activeIndex, handleScroll, scrollTo } = useSlider({ itemCount: 5 });
 
   const publicEndpointUrl = 'https://crisper.onrender.com/api/v1/audio';
   const executeUrl = `${audioEngine.baseUrl || 'https://crisper.onrender.com'}/api/v1/audio`;
@@ -95,7 +100,8 @@ export default function ApiDocsPage() {
               className="btn-copy-base"
               onClick={() => copyToClipboard(publicEndpointUrl, 'base-url')}
             >
-              {copiedKey === 'base-url' ? '✓ Copied' : 'Copy'}
+              {copiedKey === 'base-url' ? <CheckIcon /> : <CopyIcon />}
+              <span className="copy-text">{copiedKey === 'base-url' ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
         </section>
@@ -138,8 +144,13 @@ export default function ApiDocsPage() {
             When a track ID or link is processed, the backend executes this exact 5-stage pipeline:
           </p>
 
-          <div className="pipeline-steps-grid">
-            <div className="pipeline-step-item">
+          <div className="pipeline-slider-container">
+            <div 
+              className="pipeline-steps-grid"
+              ref={scrollRef}
+              onScroll={handleScroll}
+            >
+              <div className="pipeline-step-item">
               <div className="step-num">1</div>
               <div className="step-content">
                 <h4>Stage 1: Resolving Source</h4>
@@ -175,6 +186,18 @@ export default function ApiDocsPage() {
               </div>
             </div>
           </div>
+          
+          <div className="slider-dots">
+            {[0, 1, 2, 3, 4].map((idx) => (
+              <button
+                key={idx}
+                className={`slider-dot ${activeIndex === idx ? 'active' : ''}`}
+                onClick={() => scrollTo(idx)}
+                aria-label={`Go to step ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
         </section>
 
         {/* Final Return Payload & Schema */}
@@ -193,7 +216,8 @@ export default function ApiDocsPage() {
                   )
                 }
               >
-                {copiedKey === 'resp-success' ? '✓ Copied' : 'Copy JSON'}
+                {copiedKey === 'resp-success' ? <CheckIcon /> : <CopyIcon />}
+                <span className="copy-text">{copiedKey === 'resp-success' ? 'Copied' : 'Copy JSON'}</span>
               </button>
             </div>
             <pre className="code-example-pre">
@@ -225,7 +249,8 @@ export default function ApiDocsPage() {
                   )
                 }
               >
-                {copiedKey === 'resp-sse' ? '✓ Copied' : 'Copy Events'}
+                {copiedKey === 'resp-sse' ? <CheckIcon /> : <CopyIcon />}
+                <span className="copy-text">{copiedKey === 'resp-sse' ? 'Copied' : 'Copy Events'}</span>
               </button>
             </div>
             <pre className="code-example-pre">
@@ -286,7 +311,8 @@ data: {"step":5,"stage":"completed","downloadUrl":"https://tmpfiles.org/dl/wdwkS
                     className="btn-copy-sm"
                     onClick={() => copyToClipboard(testOutput, 'test-output')}
                   >
-                    {copiedKey === 'test-output' ? '✓ Copied' : 'Copy Output'}
+                    {copiedKey === 'test-output' ? <CheckIcon /> : <CopyIcon />}
+                    <span className="copy-text">{copiedKey === 'test-output' ? 'Copied' : 'Copy Output'}</span>
                   </button>
                 </div>
                 <pre className="output-pre">
@@ -313,7 +339,8 @@ data: {"step":5,"stage":"completed","downloadUrl":"https://tmpfiles.org/dl/wdwkS
                   )
                 }
               >
-                {copiedKey === 'curl-search' ? '✓ Copied' : 'Copy cURL'}
+                {copiedKey === 'curl-search' ? <CheckIcon /> : <CopyIcon />}
+                <span className="copy-text">{copiedKey === 'curl-search' ? 'Copied' : 'Copy cURL'}</span>
               </button>
             </div>
             <pre className="code-example-pre">
@@ -333,7 +360,8 @@ data: {"step":5,"stage":"completed","downloadUrl":"https://tmpfiles.org/dl/wdwkS
                   )
                 }
               >
-                {copiedKey === 'curl-download' ? '✓ Copied' : 'Copy cURL'}
+                {copiedKey === 'curl-download' ? <CheckIcon /> : <CopyIcon />}
+                <span className="copy-text">{copiedKey === 'curl-download' ? 'Copied' : 'Copy cURL'}</span>
               </button>
             </div>
             <pre className="code-example-pre">
@@ -353,7 +381,8 @@ data: {"step":5,"stage":"completed","downloadUrl":"https://tmpfiles.org/dl/wdwkS
                   )
                 }
               >
-                {copiedKey === 'curl-stream' ? '✓ Copied' : 'Copy cURL'}
+                {copiedKey === 'curl-stream' ? <CheckIcon /> : <CopyIcon />}
+                <span className="copy-text">{copiedKey === 'curl-stream' ? 'Copied' : 'Copy cURL'}</span>
               </button>
             </div>
             <pre className="code-example-pre">

@@ -1379,9 +1379,14 @@ body {
   font-size: 0.92rem;
   font-weight: 600;
   color: #ff5e87;
+  word-break: break-all;
 }
 
 .btn-copy-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   background: var(--c-crimson);
   color: #ffffff;
   border: none;
@@ -1443,6 +1448,23 @@ body {
 }
 
 @media (max-width: 680px) {
+  .simple-docs-main {
+    padding: 1rem 0 2rem;
+    gap: 1.5rem;
+  }
+  .simple-docs-title {
+    font-size: 1.8rem;
+  }
+  .simple-base-card {
+    border-radius: 14px;
+    padding: 0.85rem;
+    flex-direction: column;
+    text-align: center;
+  }
+  .simple-card {
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
+  }
   .simple-rules-grid {
     grid-template-columns: 1fr;
   }
@@ -1675,6 +1697,10 @@ body {
 }
 
 .btn-copy-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #f3f4f6;
@@ -2402,9 +2428,11 @@ body {
     padding: 1.5rem 1rem;
   }
 
-  /* Features Horizontal Slider */
-  .features-grid {
+  /* Features & Pipeline Horizontal Slider */
+  .features-grid,
+  .pipeline-steps-grid {
     display: flex;
+    flex-direction: row;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 1rem;
@@ -2416,7 +2444,8 @@ body {
     scrollbar-width: none; /* Firefox */
   }
 
-  .features-grid::-webkit-scrollbar {
+  .features-grid::-webkit-scrollbar,
+  .pipeline-steps-grid::-webkit-scrollbar {
     display: none; /* Chrome/Safari */
   }
 
@@ -2446,7 +2475,8 @@ body {
     box-shadow: 0 0 10px rgba(203, 41, 87, 0.4);
   }
 
-  .feature-card {
+  .feature-card,
+  .pipeline-step-item {
     flex: 0 0 85%; /* Cards take up 85% width to hint more exist */
     scroll-snap-align: center;
   }
@@ -2506,6 +2536,18 @@ body {
   .video-preview-thumb {
     width: 76px;
     height: 44px;
+  }
+
+  /* Copy Buttons */
+  .btn-copy-base .copy-text,
+  .btn-copy-sm .copy-text {
+    display: none;
+  }
+  .btn-copy-base {
+    padding: 0.4rem;
+  }
+  .btn-copy-sm {
+    padding: 0.35rem;
   }
 
   /* Form Elements */

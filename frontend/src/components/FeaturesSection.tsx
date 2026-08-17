@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React from 'react';
+import { useSlider } from '@/hooks/useSlider';
 
 export const FeaturesSection: React.FC = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
 
   const features = [
     {
@@ -29,33 +28,7 @@ export const FeaturesSection: React.FC = () => {
     }
   ];
 
-  const handleScroll = () => {
-    if (!scrollRef.current) return;
-    const scrollPosition = scrollRef.current.scrollLeft;
-    // We assume all cards are roughly the same width in the scroll container
-    const firstCard = scrollRef.current.querySelector('.feature-card') as HTMLElement;
-    if (!firstCard) return;
-    
-    // Add gap to card width for accurate calculation
-    const cardWidth = firstCard.offsetWidth + 16; // 1rem gap = 16px
-    const index = Math.round(scrollPosition / cardWidth);
-    
-    // Ensure index is within bounds
-    setActiveIndex(Math.max(0, Math.min(index, features.length - 1)));
-  };
-
-  const scrollTo = (index: number) => {
-    if (!scrollRef.current) return;
-    const firstCard = scrollRef.current.querySelector('.feature-card') as HTMLElement;
-    if (!firstCard) return;
-    
-    const cardWidth = firstCard.offsetWidth + 16;
-    scrollRef.current.scrollTo({
-      left: index * cardWidth,
-      behavior: 'smooth'
-    });
-    setActiveIndex(index);
-  };
+  const { scrollRef, activeIndex, handleScroll, scrollTo } = useSlider({ itemCount: features.length });
 
   return (
     <section id="features" className="info-section">

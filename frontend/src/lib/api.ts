@@ -169,8 +169,8 @@ export class ApiClient {
                   downloadUrl: localDownloadUrl,
                 });
               })
-              .catch(err => {
-                console.error('Failed to fetch blob silently, falling back to direct link', err);
+              .catch(() => {
+                // Failed to fetch blob silently, falling back to direct link
                 resolve({
                   success: true,
                   filename: payload.data.filename,
@@ -180,7 +180,7 @@ export class ApiClient {
               });
           }
         } catch (e) {
-          console.error("SSE parse error", e);
+          // Ignore invalid SSE payloads
         }
       };
 
